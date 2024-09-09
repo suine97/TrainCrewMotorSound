@@ -509,8 +509,8 @@ namespace TrainCrewMotorSound
                         isRunSection = true;
                         continue;
                     }
-                    // 空白行または別セクションならスキップし、セクション終了を示す
-                    else if (string.IsNullOrWhiteSpace(line) || (line.StartsWith("[") && line.EndsWith("]")))
+                    // 別セクションならスキップし、セクション終了を示す
+                    else if ((line.StartsWith("[") && line.EndsWith("]")))
                     {
                         isMotorSection = false;
                         isRunSection = false;
