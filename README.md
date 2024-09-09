@@ -1,7 +1,7 @@
 # TrainCrewMotorSound
 
-TrainCrewMotorSoundは、溝月レイル/Acty様製作の列車運転ゲーム「TRAIN CREW」で動作する、BVE Trainsim用モータ音連動ソフトです。
-※車両データは「BVE5」専用となります。BVE4以前およびBVE6以降には対応していません。
+TrainCrewMotorSoundは、溝月レイル/Acty様製作の列車運転ゲーム「TRAIN CREW」で動作する、BVE Trainsim用モータ音連動ソフトです。  
+#### ※車両データは「BVE5」専用となります。BVE4以前およびBVE6以降には対応していません。
 
 ![1](https://github.com/user-attachments/assets/a3aaad83-71f4-44c4-9202-dda8a07dfe03)
 
