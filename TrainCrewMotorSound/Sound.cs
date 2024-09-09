@@ -22,7 +22,8 @@ namespace TrainCrewMotorSound
         public Dictionary<int, string> runSoundData = new Dictionary<int, string>();
         public int currentRunSoundIndex = -1;
         public bool IsSoundThreadLoop = false;
-        public bool IsSoundFileLoaded = false;
+        public bool IsMotorSoundFileLoaded = false;
+        public bool IsRunSoundFileLoaded = false;
         public float fMotorMasterVolume = 1.0f;
         public float fRunMasterVolume = 1.0f;
         public string PowerVolumePath = null;
@@ -58,7 +59,8 @@ namespace TrainCrewMotorSound
                 await Task.Delay(50);
 
                 // サウンド読み込み判定
-                IsSoundFileLoaded = (motorSoundSource.Count > 0);
+                IsMotorSoundFileLoaded = (motorSoundSource.Count > 0);
+                IsRunSoundFileLoaded = (runSoundSource.Count > 0);
             }
         }
 
@@ -212,12 +214,15 @@ namespace TrainCrewMotorSound
             }
 
             // Runサウンドを再生
-            if (runSoundSource[runIndex] != null)
+            if (runSoundSource.Count > 0)
             {
-                // バッファをソースに渡して再生開始
-                runSoundSource[runIndex].SubmitSourceBuffer(runSoundBuffer[runIndex], null);
-                runSoundSource[runIndex].SetVolume(0.0f); // 音量を0に設定
-                runSoundSource[runIndex].Start();
+                if (runSoundSource[runIndex] != null)
+                {
+                    // バッファをソースに渡して再生開始
+                    runSoundSource[runIndex].SubmitSourceBuffer(runSoundBuffer[runIndex], null);
+                    runSoundSource[runIndex].SetVolume(0.0f); // 音量を0に設定
+                    runSoundSource[runIndex].Start();
+                }
             }
         }
 

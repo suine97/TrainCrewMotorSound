@@ -142,13 +142,14 @@ namespace TrainCrewMotorSound
 
                 // Text更新
                 sb.Clear();
-                sb.AppendLine("車両ファイル読込：" + (sound.IsSoundFileLoaded ? "完了" : "未読込") + "");
+                sb.AppendLine("モータ音読込　：" + (sound.IsMotorSoundFileLoaded ? "完了" : "未読込") + "");
+                sb.AppendLine("走行音読込　　：" + (sound.IsRunSoundFileLoaded ? "完了" : "未読込") + "");
                 if (vehicleDirectoryName != "")
-                    sb.AppendLine("読込フォルダ　　：" + (sound.IsSoundFileLoaded ? Path.GetFileName(vehicleDirectoryName.Substring(0, vehicleDirectoryName.Length - 1)) : "未読込") + "\n");
+                    sb.AppendLine("読込フォルダ　：" + ((sound.IsMotorSoundFileLoaded || sound.IsRunSoundFileLoaded) ? Path.GetFileName(vehicleDirectoryName.Substring(0, vehicleDirectoryName.Length - 1)) : "未読込") + "\n");
                 else
-                    sb.AppendLine("読込フォルダ　　：未読込\n");
-                sb.AppendLine("現在速度　　　　：" + state.Speed.ToString("F2") + "km/h");
-                sb.AppendLine("加速・減速判定　：" + (IsDeceleration ? "減速" : "加速"));
+                    sb.AppendLine("読込フォルダ　：未読込\n");
+                sb.AppendLine("現在速度　　　：" + state.Speed.ToString("F2") + "km/h");
+                sb.AppendLine("加速・減速判定：" + (IsDeceleration ? "減速" : "加速"));
                 Label_Parameters.Text = sb.ToString();
 
                 ResumeLayout();
@@ -244,6 +245,7 @@ namespace TrainCrewMotorSound
                 }
 
                 // 新しいrunSoundSourceを再生
+                sound.SetVolume("RUN", selectedRunSoundIndex, 0.0f);
                 sound.SoundPlay("RUN", selectedRunSoundIndex);
 
                 // 現在再生中のインデックスを更新

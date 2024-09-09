@@ -33,6 +33,9 @@
             this.TrackBar_RunVolume = new System.Windows.Forms.TrackBar();
             this.ComboBox_RunSound = new System.Windows.Forms.ComboBox();
             this.GroupBox_MotorSound = new System.Windows.Forms.GroupBox();
+            this.ComboBox_RegenerationLimit = new System.Windows.Forms.ComboBox();
+            this.Label_RegenerationLimit_Unit = new System.Windows.Forms.Label();
+            this.Label_RegenerationLimit = new System.Windows.Forms.Label();
             this.Label_MotorVolume = new System.Windows.Forms.Label();
             this.GroupBox_RunSound = new System.Windows.Forms.GroupBox();
             this.Label_RunSelect = new System.Windows.Forms.Label();
@@ -41,9 +44,6 @@
             this.Label_Parameters = new System.Windows.Forms.Label();
             this.GroupBox_Infomation = new System.Windows.Forms.GroupBox();
             this.CheckBox_NotchUnLinked = new System.Windows.Forms.CheckBox();
-            this.Label_RegenerationLimit = new System.Windows.Forms.Label();
-            this.Label_RegenerationLimit_Unit = new System.Windows.Forms.Label();
-            this.ComboBox_RegenerationLimit = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_MotorVolume)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_RunVolume)).BeginInit();
             this.GroupBox_MotorSound.SuspendLayout();
@@ -112,6 +112,44 @@
             this.GroupBox_MotorSound.TabIndex = 4;
             this.GroupBox_MotorSound.TabStop = false;
             this.GroupBox_MotorSound.Text = "モータ音";
+            // 
+            // ComboBox_RegenerationLimit
+            // 
+            this.ComboBox_RegenerationLimit.BackColor = System.Drawing.SystemColors.Window;
+            this.ComboBox_RegenerationLimit.DropDownHeight = 120;
+            this.ComboBox_RegenerationLimit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ComboBox_RegenerationLimit.DropDownWidth = 30;
+            this.ComboBox_RegenerationLimit.Font = new System.Drawing.Font("MS UI Gothic", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.ComboBox_RegenerationLimit.FormattingEnabled = true;
+            this.ComboBox_RegenerationLimit.IntegralHeight = false;
+            this.ComboBox_RegenerationLimit.ItemHeight = 15;
+            this.ComboBox_RegenerationLimit.Location = new System.Drawing.Point(95, 21);
+            this.ComboBox_RegenerationLimit.Name = "ComboBox_RegenerationLimit";
+            this.ComboBox_RegenerationLimit.Size = new System.Drawing.Size(72, 23);
+            this.ComboBox_RegenerationLimit.TabIndex = 12;
+            this.ComboBox_RegenerationLimit.SelectedIndexChanged += new System.EventHandler(this.ComboBox_RegenerationLimit_SelectedIndexChanged);
+            // 
+            // Label_RegenerationLimit_Unit
+            // 
+            this.Label_RegenerationLimit_Unit.BackColor = System.Drawing.SystemColors.Control;
+            this.Label_RegenerationLimit_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.Label_RegenerationLimit_Unit.Location = new System.Drawing.Point(173, 24);
+            this.Label_RegenerationLimit_Unit.Name = "Label_RegenerationLimit_Unit";
+            this.Label_RegenerationLimit_Unit.Size = new System.Drawing.Size(34, 20);
+            this.Label_RegenerationLimit_Unit.TabIndex = 11;
+            this.Label_RegenerationLimit_Unit.Text = "km/h";
+            this.Label_RegenerationLimit_Unit.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // Label_RegenerationLimit
+            // 
+            this.Label_RegenerationLimit.BackColor = System.Drawing.SystemColors.Control;
+            this.Label_RegenerationLimit.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.Label_RegenerationLimit.Location = new System.Drawing.Point(6, 24);
+            this.Label_RegenerationLimit.Name = "Label_RegenerationLimit";
+            this.Label_RegenerationLimit.Size = new System.Drawing.Size(83, 20);
+            this.Label_RegenerationLimit.TabIndex = 9;
+            this.Label_RegenerationLimit.Text = "回生失効速度";
+            this.Label_RegenerationLimit.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // Label_MotorVolume
             // 
@@ -206,44 +244,6 @@
             this.CheckBox_NotchUnLinked.UseVisualStyleBackColor = true;
             this.CheckBox_NotchUnLinked.CheckedChanged += new System.EventHandler(this.CheckBox_NotchUnLinked_CheckedChanged);
             // 
-            // Label_RegenerationLimit
-            // 
-            this.Label_RegenerationLimit.BackColor = System.Drawing.SystemColors.Control;
-            this.Label_RegenerationLimit.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.Label_RegenerationLimit.Location = new System.Drawing.Point(6, 24);
-            this.Label_RegenerationLimit.Name = "Label_RegenerationLimit";
-            this.Label_RegenerationLimit.Size = new System.Drawing.Size(83, 20);
-            this.Label_RegenerationLimit.TabIndex = 9;
-            this.Label_RegenerationLimit.Text = "回生失効速度";
-            this.Label_RegenerationLimit.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // Label_RegenerationLimit_Unit
-            // 
-            this.Label_RegenerationLimit_Unit.BackColor = System.Drawing.SystemColors.Control;
-            this.Label_RegenerationLimit_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.Label_RegenerationLimit_Unit.Location = new System.Drawing.Point(173, 24);
-            this.Label_RegenerationLimit_Unit.Name = "Label_RegenerationLimit_Unit";
-            this.Label_RegenerationLimit_Unit.Size = new System.Drawing.Size(34, 20);
-            this.Label_RegenerationLimit_Unit.TabIndex = 11;
-            this.Label_RegenerationLimit_Unit.Text = "km/h";
-            this.Label_RegenerationLimit_Unit.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // ComboBox_RegenerationLimit
-            // 
-            this.ComboBox_RegenerationLimit.BackColor = System.Drawing.SystemColors.Window;
-            this.ComboBox_RegenerationLimit.DropDownHeight = 120;
-            this.ComboBox_RegenerationLimit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.ComboBox_RegenerationLimit.DropDownWidth = 30;
-            this.ComboBox_RegenerationLimit.Font = new System.Drawing.Font("MS UI Gothic", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.ComboBox_RegenerationLimit.FormattingEnabled = true;
-            this.ComboBox_RegenerationLimit.IntegralHeight = false;
-            this.ComboBox_RegenerationLimit.ItemHeight = 15;
-            this.ComboBox_RegenerationLimit.Location = new System.Drawing.Point(95, 21);
-            this.ComboBox_RegenerationLimit.Name = "ComboBox_RegenerationLimit";
-            this.ComboBox_RegenerationLimit.Size = new System.Drawing.Size(72, 23);
-            this.ComboBox_RegenerationLimit.TabIndex = 12;
-            this.ComboBox_RegenerationLimit.SelectedIndexChanged += new System.EventHandler(this.ComboBox_RegenerationLimit_SelectedIndexChanged);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -257,7 +257,7 @@
             this.Controls.Add(this.Button_OpenFile);
             this.DoubleBuffered = true;
             this.Name = "MainForm";
-            this.Text = "TrainCrewMotorSound Ver.1.0.0 (Build 2024.09.09)";
+            this.Text = "TrainCrewMotorSound Ver.1.0.1 (Build 2024.09.10)";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_MotorVolume)).EndInit();
