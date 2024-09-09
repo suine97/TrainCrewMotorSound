@@ -281,11 +281,13 @@ namespace TrainCrewMotorSound
             if (type.ToUpper() == "MOTOR")
             {
                 if (index < 0 || index >= motorSoundSource.Count || motorSoundSource[index] == null) return;
+                if (volume < 0) volume = 0;
                 motorSoundSource[index].SetVolume(fMotorMasterVolume * volume);
             }
             else if (type.ToUpper() == "RUN")
             {
                 if (index < 0 || index >= runSoundSource.Count || runSoundSource[index] == null) return;
+                if (volume < 0) volume = 0;
                 runSoundSource[index].SetVolume(fRunMasterVolume * volume);
             }
         }
