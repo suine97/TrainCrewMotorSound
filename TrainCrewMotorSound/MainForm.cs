@@ -638,6 +638,9 @@ namespace TrainCrewMotorSound
                 // CSVファイル読込
                 var data = ReadCSVFile(filePath);
 
+                // 1列目で昇順にソートする
+                SortByFirstColumn(data);
+
                 // 各列の1行目が空白の場合、0を代入
                 FillFirstRowWithZero(data);
 
@@ -684,6 +687,13 @@ namespace TrainCrewMotorSound
                 var values = line.Split(',')
                                  .Select(v => float.TryParse(v, out var num) ? (float?)num : null)
                                  .ToList();
+
+                // 1列目が空白の場合は無視
+                if (!values.Any() || values[0] == null)
+                {
+                    continue;
+                }
+
                 data.Add(values);
             }
             return data;
@@ -899,6 +909,27 @@ namespace TrainCrewMotorSound
             }
 
             return interpolatedValues;
+        }
+
+        /// <summary>
+        /// List<List<float?>> 型のデータを1列目の値で昇順にソートするメソッド
+        /// </summary>
+        /// <param name="data">ソート対象のデータ</param>
+        private void SortByFirstColumn(List<List<float?>> data)
+        {
+            data.Sort((row1, row2) =>
+            {
+                float? value1 = row1[0];
+                float? value2 = row2[0];
+
+                // nullの場合の処理（nullは最後に並ぶようにする）
+                if (value1 == null && value2 == null) return 0;
+                if (value1 == null) return 1;
+                if (value2 == null) return -1;
+
+                // 昇順で比較
+                return value1.Value.CompareTo(value2.Value);
+            });
         }
     }
 }
