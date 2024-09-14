@@ -394,12 +394,13 @@ namespace TrainCrewMotorSound
             try
             {
                 string[] lines = File.ReadAllLines(filePath);
+                string[] firstLineParts = lines[0].Split(' ');
 
-                // 1行目が "Bvets Vehicle" で始まっているか確認
-                if (lines.Length == 0 || !lines[0].ToUpper().StartsWith("BVETS VEHICLE"))
+                // "Bvets Vehicle バージョン番号" の形式になっているか確認
+                if (lines.Length == 0 || !lines[0].ToUpper().StartsWith("BVETS VEHICLE") || firstLineParts.Length < 3 || !double.TryParse(firstLineParts[2], out _))
                 {
                     MessageBox.Show(Path.GetFileName(filePath) + "は\nBVE5の車両ファイルではありません。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
+                    throw new Exception();
                 }
 
                 // 正規表現でSoundやMotorNoiseのパスを抽出
@@ -436,7 +437,7 @@ namespace TrainCrewMotorSound
             }
             catch
             {
-                MessageBox.Show(Path.GetFileName(filePath) + "を読み込めませんでした。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("車両ファイルを読み込めませんでした。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 throw;
             }
         }
