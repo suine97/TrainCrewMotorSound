@@ -44,6 +44,7 @@
             this.Label_Parameters = new System.Windows.Forms.Label();
             this.GroupBox_Infomation = new System.Windows.Forms.GroupBox();
             this.CheckBox_NotchUnLinked = new System.Windows.Forms.CheckBox();
+            this.CheckBox_EB = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_MotorVolume)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_RunVolume)).BeginInit();
             this.GroupBox_MotorSound.SuspendLayout();
@@ -54,7 +55,7 @@
             // Button_OpenFile
             // 
             this.Button_OpenFile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            this.Button_OpenFile.Location = new System.Drawing.Point(38, 78);
+            this.Button_OpenFile.Location = new System.Drawing.Point(38, 93);
             this.Button_OpenFile.Name = "Button_OpenFile";
             this.Button_OpenFile.Size = new System.Drawing.Size(132, 38);
             this.Button_OpenFile.TabIndex = 0;
@@ -244,11 +245,25 @@
             this.CheckBox_NotchUnLinked.UseVisualStyleBackColor = true;
             this.CheckBox_NotchUnLinked.CheckedChanged += new System.EventHandler(this.CheckBox_NotchUnLinked_CheckedChanged);
             // 
+            // CheckBox_EB
+            // 
+            this.CheckBox_EB.AutoSize = true;
+            this.CheckBox_EB.Checked = true;
+            this.CheckBox_EB.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.CheckBox_EB.Location = new System.Drawing.Point(12, 56);
+            this.CheckBox_EB.Name = "CheckBox_EB";
+            this.CheckBox_EB.Size = new System.Drawing.Size(139, 16);
+            this.CheckBox_EB.TabIndex = 9;
+            this.CheckBox_EB.Text = "非常ブレーキ時回生オフ";
+            this.CheckBox_EB.UseVisualStyleBackColor = true;
+            this.CheckBox_EB.CheckedChanged += new System.EventHandler(this.CheckBox_EB_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(434, 281);
+            this.Controls.Add(this.CheckBox_EB);
             this.Controls.Add(this.CheckBox_NotchUnLinked);
             this.Controls.Add(this.GroupBox_Infomation);
             this.Controls.Add(this.CheckBox_TopMost);
@@ -257,7 +272,7 @@
             this.Controls.Add(this.Button_OpenFile);
             this.DoubleBuffered = true;
             this.Name = "MainForm";
-            this.Text = "TrainCrewMotorSound Ver.1.0.2 (Build 2024.09.14)";
+            this.Text = "TrainCrewMotorSound Ver.1.0.3 (Build 2024.09.20)";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_MotorVolume)).EndInit();
@@ -288,6 +303,7 @@
         private System.Windows.Forms.Label Label_RegenerationLimit;
         private System.Windows.Forms.Label Label_RegenerationLimit_Unit;
         private System.Windows.Forms.ComboBox ComboBox_RegenerationLimit;
+        private System.Windows.Forms.CheckBox CheckBox_EB;
     }
 }
 

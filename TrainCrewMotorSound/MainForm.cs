@@ -20,6 +20,7 @@ namespace TrainCrewMotorSound
         private int iRegenerationLimit = 0;
         private bool IsDeceleration = false;
         private bool IsNotchLinked = true;
+        private bool IsRegenerationOffAtEB = true;
         private string vehicleDirectoryName = "";
         private string soundDirectoryName = "";
         private string motorNoiseDirectoryName = "";
@@ -75,6 +76,10 @@ namespace TrainCrewMotorSound
 
                 SuspendLayout();
 
+                bool isSMEECar = (state.CarStates[0].CarModel == "3020");
+                bool isSMEECarEB = (state.Bnotch == 9);
+                bool isMute = IsRegenerationOffAtEB && ((isSMEECar && isSMEECarEB) || (!isSMEECar && state.Lamps[PanelLamp.EmagencyBrake]));
+
                 // 各Motorサウンドに対して値を設定
                 if (!IsDeceleration)
                 {
@@ -82,10 +87,10 @@ namespace TrainCrewMotorSound
                     if (PowerVolumeData.Count > 0)
                     {
                         var strPowerVolumeValues = GetInterpolatedValuesForSpeed(PowerVolumeData, state.Speed);
-                        for (int col = 0; col < strPowerVolumeValues.Count - 1; col++)
+                        for (int col = 0; col <= strPowerVolumeValues.Count - 1; col++)
                         {
                             int index = col;
-                            if (!state.Lamps[PanelLamp.EmagencyBrake] && ((IsNotchLinked && state.Pnotch > 0 && state.Speed > 0.0f) || (!IsNotchLinked && state.Speed > 0.0f)))
+                            if (!isMute && ((IsNotchLinked && state.Pnotch > 0 && state.Speed > 0.0f) || (!IsNotchLinked && state.Speed > 0.0f)))
                                 sound.SetVolume("MOTOR", index, strPowerVolumeValues[col]);
                             else
                                 sound.SetVolume("MOTOR", index, 0.0f);
@@ -95,7 +100,7 @@ namespace TrainCrewMotorSound
                     if (PowerFrequencyData.Count > 0)
                     {
                         var strPowerFrequencyValues = GetInterpolatedValuesForSpeed(PowerFrequencyData, state.Speed);
-                        for (int col = 0; col < strPowerFrequencyValues.Count - 1; col++)
+                        for (int col = 0; col <= strPowerFrequencyValues.Count - 1; col++)
                         {
                             int index = col;
                             sound.SetPitch("MOTOR", index, strPowerFrequencyValues[col]);
@@ -108,10 +113,10 @@ namespace TrainCrewMotorSound
                     if (BrakeVolumeData.Count > 0)
                     {
                         var strBrakeVolumeValues = GetInterpolatedValuesForSpeed(BrakeVolumeData, state.Speed);
-                        for (int col = 0; col < strBrakeVolumeValues.Count - 1; col++)
+                        for (int col = 0; col <= strBrakeVolumeValues.Count - 1; col++)
                         {
                             int index = col;
-                            if (!state.Lamps[PanelLamp.EmagencyBrake] && (iRegenerationLimit <= state.Speed) && ((IsNotchLinked && state.Bnotch > 0 && state.Speed > 0.0f) || (!IsNotchLinked && state.Speed > 0.0f)))
+                            if (!isMute && (iRegenerationLimit <= state.Speed) && ((IsNotchLinked && state.Bnotch > 0 && state.Speed > 0.0f) || (!IsNotchLinked && state.Speed > 0.0f)))
                                 sound.SetVolume("MOTOR", index, strBrakeVolumeValues[col]);
                             else
                                 sound.SetVolume("MOTOR", index, 0.0f);
@@ -121,7 +126,7 @@ namespace TrainCrewMotorSound
                     if (BrakeFrequencyData.Count > 0)
                     {
                         var strBrakeFrequencyValues = GetInterpolatedValuesForSpeed(BrakeFrequencyData, state.Speed);
-                        for (int col = 0; col < strBrakeFrequencyValues.Count - 1; col++)
+                        for (int col = 0; col <= strBrakeFrequencyValues.Count - 1; col++)
                         {
                             int index = col;
                             sound.SetPitch("MOTOR", index, strBrakeFrequencyValues[col]);
@@ -218,6 +223,11 @@ namespace TrainCrewMotorSound
                     PowerFrequencyData = ConvertCSVData(sound.PowerFrequencyPath);
                     BrakeVolumeData = ConvertCSVData(sound.BrakeVolumePath);
                     BrakeFrequencyData = ConvertCSVData(sound.BrakeFrequencyPath);
+                    // CSVファイル書き出し
+                    WriteCsv("PowerVolumeData.csv", PowerVolumeData);
+                    WriteCsv("PowerFrequencyData.csv", PowerFrequencyData);
+                    WriteCsv("BrakeVolumeData.csv", BrakeVolumeData);
+                    WriteCsv("BrakeFrequencyData.csv", BrakeFrequencyData);
                 }
                 catch
                 {
@@ -293,6 +303,16 @@ namespace TrainCrewMotorSound
         private void CheckBox_NotchUnLinked_CheckedChanged(object sender, EventArgs e)
         {
             IsNotchLinked = CheckBox_NotchUnLinked.Checked;
+        }
+
+        /// <summary>
+        /// CheckBox_EB_CheckedChangedイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CheckBox_EB_CheckedChanged(object sender, EventArgs e)
+        {
+            IsRegenerationOffAtEB = CheckBox_EB.Checked;
         }
 
         /// <summary>
@@ -638,6 +658,9 @@ namespace TrainCrewMotorSound
                 // CSVファイル読込
                 var data = ReadCSVFile(filePath);
 
+                // 1列目がマイナス値の行を削除
+                RemoveNegativeRows(data);
+
                 // 1列目で昇順にソートする
                 SortByFirstColumn(data);
 
@@ -697,6 +720,15 @@ namespace TrainCrewMotorSound
                 data.Add(values);
             }
             return data;
+        }
+
+        /// <summary>
+        /// 1列目がマイナス値の行を削除する
+        /// </summary>
+        /// <param name="data"></param>
+        private void RemoveNegativeRows(List<List<float?>> data)
+        {
+            data.RemoveAll(row => row[0].HasValue && row[0].Value < 0);
         }
 
         /// <summary>
@@ -771,7 +803,15 @@ namespace TrainCrewMotorSound
                         // 前後に有効な値が見つかった場合に線形補間を行う
                         if (foundLower && foundUpper && lowerValue.HasValue && upperValue.HasValue)
                         {
-                            data[i][col] = CustomMath.Lerp(lowerSpeed, lowerValue.Value, upperSpeed, upperValue.Value, data[i][0].Value);
+                            if (Math.Abs(upperSpeed - lowerSpeed) < float.Epsilon)
+                            {
+                                // 速度が同じ場合は、補間せずにその値を使う
+                                data[i][col] = lowerValue.Value;
+                            }
+                            else
+                            {
+                                data[i][col] = CustomMath.Lerp(lowerSpeed, lowerValue.Value, upperSpeed, upperValue.Value, data[i][0].Value);
+                            }
                         }
                         // 前方のみ有効な値が見つかり、2番目の前方の値も見つかった場合
                         else if (foundLower && secondLowerValue.HasValue)
@@ -930,6 +970,24 @@ namespace TrainCrewMotorSound
                 // 昇順で比較
                 return value1.Value.CompareTo(value2.Value);
             });
+        }
+
+        /// <summary>
+        /// CSVファイル書き出しメソッド(デバッグ用)
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="data"></param>
+        static void WriteCsv(string filePath, List<List<float?>> data)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                foreach (var row in data)
+                {
+                    // 各行のデータをカンマで区切り、nullは空文字列として扱う
+                    var line = string.Join(",", row.Select(x => x.HasValue ? x.ToString() : ""));
+                    writer.WriteLine(line);
+                }
+            }
         }
     }
 }
