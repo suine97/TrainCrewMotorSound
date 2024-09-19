@@ -3,8 +3,7 @@
 TrainCrewMotorSoundは、溝月レイル/Acty様製作の列車運転ゲーム「TRAIN CREW」で動作する、BVE Trainsim用モータ音連動ソフトです。  
 #### ※車両データは「BVE5」専用となります。BVE4以前およびBVE6以降には対応していません。
 
-![1](https://github.com/user-attachments/assets/a3aaad83-71f4-44c4-9202-dda8a07dfe03)
-
+![1](https://github.com/user-attachments/assets/b35ce880-b7ad-4487-95d5-b5771fe63688)
 
 # 使い方
 1、TRAIN CREWの操作設定→外部デバイス入出力を「有効」に設定してください。
@@ -13,9 +12,9 @@ TrainCrewMotorSoundは、溝月レイル/Acty様製作の列車運転ゲーム�
 
 3、Zipファイルを解凍後、TrainCrewMoniter.exeをダブルクリックして起動してください。ファイルの解凍先は自由です。
 
-4、[BVE車両ファイル読込]ボタンをクリックして、ダイアログからVehicleファイルを選択します。
+4、[ BVE車両ファイル読込 ] ボタンをクリックして、ダイアログからVehicleファイルを選択します。
 
-5、[情報]欄の"車両ファイル読込"項目が[完了]になっていれば成功です。
+5、[ 情報 ] 欄の"モータ音読込"項目が [ 完了 ] になっていれば成功です。
 
 # 操作説明
 
