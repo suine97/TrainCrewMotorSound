@@ -223,11 +223,12 @@ namespace TrainCrewMotorSound
                     PowerFrequencyData = ConvertCSVData(sound.PowerFrequencyPath);
                     BrakeVolumeData = ConvertCSVData(sound.BrakeVolumePath);
                     BrakeFrequencyData = ConvertCSVData(sound.BrakeFrequencyPath);
-                    // CSVファイル書き出し
-                    WriteCsv("PowerVolumeData.csv", PowerVolumeData);
-                    WriteCsv("PowerFrequencyData.csv", PowerFrequencyData);
-                    WriteCsv("BrakeVolumeData.csv", BrakeVolumeData);
-                    WriteCsv("BrakeFrequencyData.csv", BrakeFrequencyData);
+
+                    //// CSVファイル書き出し
+                    //WriteCsv("PowerVolumeData.csv", PowerVolumeData);
+                    //WriteCsv("PowerFrequencyData.csv", PowerFrequencyData);
+                    //WriteCsv("BrakeVolumeData.csv", BrakeVolumeData);
+                    //WriteCsv("BrakeFrequencyData.csv", BrakeFrequencyData);
                 }
                 catch
                 {
