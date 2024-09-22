@@ -272,7 +272,7 @@
             this.Controls.Add(this.Button_OpenFile);
             this.DoubleBuffered = true;
             this.Name = "MainForm";
-            this.Text = "TrainCrewMotorSound Ver.1.0.3 (Build 2024.09.20)";
+            this.Text = "TrainCrewMotorSound Ver.1.0.4 (Build 2024.09.22)";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_MotorVolume)).EndInit();

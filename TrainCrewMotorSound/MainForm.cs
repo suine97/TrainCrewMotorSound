@@ -78,6 +78,7 @@ namespace TrainCrewMotorSound
 
                 bool isSMEECar = (state.CarStates[0].CarModel == "3020");
                 bool isSMEECarEB = (state.Bnotch == 9);
+                bool isReverserOff = state.Reverser == 0;
                 bool isMute = IsRegenerationOffAtEB && ((isSMEECar && isSMEECarEB) || (!isSMEECar && state.Lamps[PanelLamp.EmagencyBrake]));
 
                 // 各Motorサウンドに対して値を設定
@@ -90,7 +91,7 @@ namespace TrainCrewMotorSound
                         for (int col = 0; col <= strPowerVolumeValues.Count - 1; col++)
                         {
                             int index = col;
-                            if (!isMute && ((IsNotchLinked && state.Pnotch > 0 && state.Speed > 0.0f) || (!IsNotchLinked && state.Speed > 0.0f)))
+                            if (!isMute && ((IsNotchLinked && !isReverserOff && state.Pnotch > 0 && state.Speed > 0.0f) || (!IsNotchLinked && state.Speed > 0.0f)))
                                 sound.SetVolume("MOTOR", index, strPowerVolumeValues[col]);
                             else
                                 sound.SetVolume("MOTOR", index, 0.0f);
@@ -116,7 +117,7 @@ namespace TrainCrewMotorSound
                         for (int col = 0; col <= strBrakeVolumeValues.Count - 1; col++)
                         {
                             int index = col;
-                            if (!isMute && (iRegenerationLimit <= state.Speed) && ((IsNotchLinked && state.Bnotch > 0 && state.Speed > 0.0f) || (!IsNotchLinked && state.Speed > 0.0f)))
+                            if (!isMute && (iRegenerationLimit <= state.Speed) && ((IsNotchLinked && !isReverserOff && state.Bnotch > 0 && state.Speed > 0.0f) || (!IsNotchLinked && state.Speed > 0.0f)))
                                 sound.SetVolume("MOTOR", index, strBrakeVolumeValues[col]);
                             else
                                 sound.SetVolume("MOTOR", index, 0.0f);
