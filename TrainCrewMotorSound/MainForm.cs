@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TrainCrew;
+using static System.Windows.Forms.AxHost;
 
 namespace TrainCrewMotorSound
 {
@@ -160,7 +161,20 @@ namespace TrainCrewMotorSound
 
                 ResumeLayout();
             }
-            catch {}
+            catch
+            {
+                // Text更新
+                sb.Clear();
+                sb.AppendLine("モータ音読込　：" + (sound.IsMotorSoundFileLoaded ? "完了" : "未読込") + "");
+                sb.AppendLine("走行音読込　　：" + (sound.IsRunSoundFileLoaded ? "完了" : "未読込") + "");
+                if (vehicleDirectoryName != "")
+                    sb.AppendLine("読込フォルダ　：" + ((sound.IsMotorSoundFileLoaded || sound.IsRunSoundFileLoaded) ? Path.GetFileName(vehicleDirectoryName.Substring(0, vehicleDirectoryName.Length - 1)) : "未読込") + "\n");
+                else
+                    sb.AppendLine("読込フォルダ　：未読込\n");
+                sb.AppendLine("現在速度　　　：" + "0.00km/h");
+                sb.AppendLine("加速・減速判定：" + (IsDeceleration ? "減速" : "加速"));
+                Label_Parameters.Text = sb.ToString();
+            }
         }
 
         /// <summary>
@@ -415,8 +429,32 @@ namespace TrainCrewMotorSound
         {
             try
             {
-                string[] lines = File.ReadAllLines(filePath);
-                string[] firstLineParts = lines[0].Split(' ');
+                // ファイルのエンコーディング設定
+                Encoding encoding = Encoding.UTF8;
+                string firstLine = File.ReadLines(filePath).FirstOrDefault();
+
+                // "BVETS VEHICLE" の行が存在し、エンコーディング情報が含まれているか確認
+                if (firstLine != null && firstLine.ToUpper().StartsWith("BVETS VEHICLE"))
+                {
+                    string[] parts = firstLine.Split(':');
+                    if (parts.Length == 2)
+                    {
+                        try
+                        {
+                            encoding = Encoding.GetEncoding(parts[1].Trim());
+                        }
+                        catch (ArgumentException)
+                        {
+                            encoding = Encoding.UTF8;
+                        }
+                    }
+                }
+
+                // エンコーディングを使ってファイルを読み込む
+                string[] lines = File.ReadAllLines(filePath, encoding);
+                string[] firstLineParts = lines[0]
+                        .Replace(":", " ")
+                        .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                 // "Bvets Vehicle バージョン番号" の形式になっているか確認
                 if (lines.Length == 0 || !lines[0].ToUpper().StartsWith("BVETS VEHICLE") || firstLineParts.Length < 3 || !double.TryParse(firstLineParts[2], out _))
@@ -428,8 +466,8 @@ namespace TrainCrewMotorSound
                 // 正規表現でSoundやMotorNoiseのパスを抽出
                 foreach (string line in lines)
                 {
-                    var soundMatch = Regex.Match(line, @"^Sound\s*=\s*(.+)$");
-                    var motorNoiseMatch = Regex.Match(line, @"^MotorNoise\s*=\s*(.+)$");
+                    var soundMatch = Regex.Match(line, @"^Sound\s*=\s*(.+)$", RegexOptions.IgnoreCase);
+                    var motorNoiseMatch = Regex.Match(line, @"^MotorNoise\s*=\s*(.+)$", RegexOptions.IgnoreCase);
 
                     if (soundMatch.Success)
                     {
@@ -490,7 +528,8 @@ namespace TrainCrewMotorSound
             Encoding encoding = Encoding.UTF8;
             string firstLine = File.ReadLines(filePath).FirstOrDefault();
 
-            if (firstLine != null && firstLine.StartsWith("Bvets Vehicle"))
+            // "BVETS VEHICLE" の行が存在し、エンコーディング情報が含まれているか確認
+            if (firstLine != null && firstLine.ToUpper().StartsWith("BVETS VEHICLE"))
             {
                 string[] parts = firstLine.Split(':');
                 if (parts.Length == 2)
