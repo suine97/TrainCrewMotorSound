@@ -26,6 +26,7 @@ namespace TrainCrewMotorSound
         public bool IsRunSoundFileLoaded = false;
         public float fMotorMasterVolume = 1.0f;
         public float fRunMasterVolume = 1.0f;
+        public float fFadeVolume = 1.0f;
         public string PowerVolumePath = null;
         public string PowerFrequencyPath = null;
         public string BrakeVolumePath = null;
@@ -287,7 +288,7 @@ namespace TrainCrewMotorSound
             {
                 if (index < 0 || index >= motorSoundSource.Count || motorSoundSource[index] == null) return;
                 if (volume < 0) volume = 0;
-                motorSoundSource[index].SetVolume(fMotorMasterVolume * volume);
+                motorSoundSource[index].SetVolume(fMotorMasterVolume * fFadeVolume * volume);
             }
             else if (type.ToUpper() == "RUN")
             {

@@ -19,6 +19,7 @@ namespace TrainCrewMotorSound
         private readonly StringBuilder sb = new StringBuilder();
         private float fOldSpeed = 0.0f;
         private int iRegenerationLimit = 0;
+        private bool IsFadeIn = false;
         private bool IsDeceleration = false;
         private bool IsNotchLinked = true;
         private bool IsRegenerationOffAtEB = true;
@@ -75,12 +76,44 @@ namespace TrainCrewMotorSound
                 var state = TrainCrewInput.GetTrainState();
                 if (state == null) { return; }
 
+                float speed = 0.0f;
+                bool isSMEECar = false;
+                bool isSMEECarEB = false;
+                bool isReverserOff = false;
+                bool isMute = true;
+                bool isAcc = false;
+                bool isDec = false;
+
+                //運転画面遷移なら処理
+                if (TrainCrewInput.gameState.gameScreen == GameScreen.MainGame
+                    || TrainCrewInput.gameState.gameScreen == GameScreen.MainGame_Pause
+                    || TrainCrewInput.gameState.gameScreen == GameScreen.MainGame_Loading)
+                {
+                    if (state.CarStates.Count > 0)
+                    {
+                        speed = state.Speed;
+                        isSMEECar = (state.CarStates[0].CarModel == "3020");
+                        isSMEECarEB = (state.Bnotch == 9);
+                        isReverserOff = state.Reverser == 0;
+                        isMute = IsRegenerationOffAtEB && ((isSMEECar && isSMEECarEB) || (!isSMEECar && state.Lamps[PanelLamp.EmagencyBrake]));
+                        isAcc = !isMute && ((IsNotchLinked && !isReverserOff && state.Pnotch > 0 && speed > 0.0f) || (!IsNotchLinked && speed > 0.0f));
+                        isDec = !isMute && (iRegenerationLimit <= speed) && ((IsNotchLinked && !isReverserOff && state.Bnotch > 0 && speed > 0.0f));
+                    }
+                }
+
                 SuspendLayout();
 
-                bool isSMEECar = (state.CarStates[0].CarModel == "3020");
-                bool isSMEECarEB = (state.Bnotch == 9);
-                bool isReverserOff = state.Reverser == 0;
-                bool isMute = IsRegenerationOffAtEB && ((isSMEECar && isSMEECarEB) || (!isSMEECar && state.Lamps[PanelLamp.EmagencyBrake]));
+                // Motorサウンド音量フェード処理
+                if (IsFadeIn && (isAcc || isDec))
+                {
+                    _ = FadeAsync(true, 0.2f);
+                    IsFadeIn = false;
+                }
+                else if (!IsFadeIn && !isAcc && !isDec)
+                {
+                    _ = FadeAsync(false, 0.2f);
+                    IsFadeIn = true;
+                }
 
                 // 各Motorサウンドに対して値を設定
                 if (!IsDeceleration)
@@ -88,20 +121,17 @@ namespace TrainCrewMotorSound
                     // 加速(音量)
                     if (PowerVolumeData.Count > 0)
                     {
-                        var strPowerVolumeValues = GetInterpolatedValuesForSpeed(PowerVolumeData, state.Speed);
+                        var strPowerVolumeValues = GetInterpolatedValuesForSpeed(PowerVolumeData, speed);
                         for (int col = 0; col <= strPowerVolumeValues.Count - 1; col++)
                         {
                             int index = col;
-                            if (!isMute && ((IsNotchLinked && !isReverserOff && state.Pnotch > 0 && state.Speed > 0.0f) || (!IsNotchLinked && state.Speed > 0.0f)))
-                                sound.SetVolume("MOTOR", index, strPowerVolumeValues[col]);
-                            else
-                                sound.SetVolume("MOTOR", index, 0.0f);
+                            sound.SetVolume("MOTOR", index, strPowerVolumeValues[col]);
                         }
                     }
                     // 加速(ピッチ)
                     if (PowerFrequencyData.Count > 0)
                     {
-                        var strPowerFrequencyValues = GetInterpolatedValuesForSpeed(PowerFrequencyData, state.Speed);
+                        var strPowerFrequencyValues = GetInterpolatedValuesForSpeed(PowerFrequencyData, speed);
                         for (int col = 0; col <= strPowerFrequencyValues.Count - 1; col++)
                         {
                             int index = col;
@@ -114,20 +144,17 @@ namespace TrainCrewMotorSound
                     // 減速(音量)
                     if (BrakeVolumeData.Count > 0)
                     {
-                        var strBrakeVolumeValues = GetInterpolatedValuesForSpeed(BrakeVolumeData, state.Speed);
+                        var strBrakeVolumeValues = GetInterpolatedValuesForSpeed(BrakeVolumeData, speed);
                         for (int col = 0; col <= strBrakeVolumeValues.Count - 1; col++)
                         {
                             int index = col;
-                            if (!isMute && (iRegenerationLimit <= state.Speed) && ((IsNotchLinked && !isReverserOff && state.Bnotch > 0 && state.Speed > 0.0f) || (!IsNotchLinked && state.Speed > 0.0f)))
-                                sound.SetVolume("MOTOR", index, strBrakeVolumeValues[col]);
-                            else
-                                sound.SetVolume("MOTOR", index, 0.0f);
+                            sound.SetVolume("MOTOR", index, strBrakeVolumeValues[col]);
                         }
                     }
                     // 減速(ピッチ)
                     if (BrakeFrequencyData.Count > 0)
                     {
-                        var strBrakeFrequencyValues = GetInterpolatedValuesForSpeed(BrakeFrequencyData, state.Speed);
+                        var strBrakeFrequencyValues = GetInterpolatedValuesForSpeed(BrakeFrequencyData, speed);
                         for (int col = 0; col <= strBrakeFrequencyValues.Count - 1; col++)
                         {
                             int index = col;
@@ -136,8 +163,8 @@ namespace TrainCrewMotorSound
                     }
                 }
                 // Runサウンドに対して値を設定
-                var runVolume = CustomMath.Lerp(0.0f, 0.0f, 90.0f, 1.0f, state.Speed);
-                var runFrequency = CustomMath.Lerp(0.0f, 0.0f, 90.0f, 1.0f, state.Speed);
+                var runVolume = CustomMath.Lerp(0.0f, 0.0f, 90.0f, 1.0f, speed);
+                var runFrequency = CustomMath.Lerp(0.0f, 0.0f, 90.0f, 1.0f, speed);
                 if (runVolume > 1.0f) runVolume = 1.0f;
                 if (0.0f > runVolume) runVolume = 0.0f;
                 if (0.0f > runFrequency) runFrequency = 0.0f;
@@ -155,7 +182,7 @@ namespace TrainCrewMotorSound
                     sb.AppendLine("読込フォルダ　：" + ((sound.IsMotorSoundFileLoaded || sound.IsRunSoundFileLoaded) ? Path.GetFileName(vehicleDirectoryName.Substring(0, vehicleDirectoryName.Length - 1)) : "未読込") + "\n");
                 else
                     sb.AppendLine("読込フォルダ　：未読込\n");
-                sb.AppendLine("現在速度　　　：" + state.Speed.ToString("F2") + "km/h");
+                sb.AppendLine("現在速度　　　：" + speed.ToString("F2") + "km/h");
                 sb.AppendLine("加速・減速判定：" + (IsDeceleration ? "減速" : "加速"));
                 Label_Parameters.Text = sb.ToString();
 
@@ -189,11 +216,28 @@ namespace TrainCrewMotorSound
                 var state = TrainCrewInput.GetTrainState();
                 if (state == null) { return; }
 
-                // 加速・減速判定
-                if (fOldSpeed > Math.Abs(state.Speed)) IsDeceleration = true;
-                if (Math.Abs(state.Speed) > fOldSpeed) IsDeceleration = false;
-                fOldSpeed = Math.Abs(state.Speed);
+                float speed = 0.0f;
 
+                //運転画面遷移なら処理
+                if (TrainCrewInput.gameState.gameScreen == GameScreen.MainGame
+                    || TrainCrewInput.gameState.gameScreen == GameScreen.MainGame_Pause
+                    || TrainCrewInput.gameState.gameScreen == GameScreen.MainGame_Loading)
+                {
+                    speed = state.Speed;
+                }
+
+                // 加速・減速判定
+                if (IsNotchLinked)
+                {
+                    if (state.Bnotch > 0) IsDeceleration = true;
+                    else if (state.Pnotch > 0) IsDeceleration = false;
+                }
+                else
+                {
+                    if (fOldSpeed > Math.Abs(speed)) IsDeceleration = true;
+                    else if (Math.Abs(speed) > fOldSpeed) IsDeceleration = false;
+                }
+                fOldSpeed = Math.Abs(speed);
             }
             catch {}
         }
@@ -1011,6 +1055,46 @@ namespace TrainCrewMotorSound
                 // 昇順で比較
                 return value1.Value.CompareTo(value2.Value);
             });
+        }
+
+        /// <summary>
+        /// フェードイン・フェードアウト演算メソッド
+        /// </summary>
+        /// <param name="fadeIn"></param>
+        /// <param name="duration"></param>
+        /// <returns></returns>
+        private async Task FadeAsync(bool fadeIn, float duration)
+        {
+            // 開始と終了の値を設定
+            float startValue = fadeIn ? 0.0f : 1.0f;
+            float endValue = fadeIn ? 1.0f : 0.0f;
+            float currentValue = startValue;
+
+            // 徐々に変化させるループ
+            float stepTime = 0.01f; // ステップの間隔 (秒)
+            int steps = (int)(duration / stepTime);
+
+            for (int i = 0; i <= steps; i++)
+            {
+                // 現在の時間を計算 (0.0f ～ 1.0f)
+                float currentTime = i * stepTime;
+
+                // Lerpを用いて線形補間
+                currentValue = CustomMath.Lerp(0.0f, startValue, duration, endValue, currentTime);
+                ApplyFade(currentValue);
+
+                // ステップ間隔だけ待機
+                await Task.Delay(TimeSpan.FromSeconds(stepTime));
+            }
+        }
+        /// <summary>
+        /// フェード処理メソッド
+        /// </summary>
+        /// <param name="value"></param>
+        private void ApplyFade(float value)
+        {
+            Console.WriteLine($"Current fade value: {value}");
+            sound.fFadeVolume = value;
         }
 
         /// <summary>
