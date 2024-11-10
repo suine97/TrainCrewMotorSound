@@ -80,6 +80,9 @@ namespace TrainCrewMotorSound
                 bool isSMEECar = false;
                 bool isSMEECarEB = false;
                 bool isReverserOff = false;
+                bool isPower = false;
+                bool isRegenerater = false;
+                bool isBCPress = false;
                 bool isMute = true;
                 bool isAcc = false;
                 bool isDec = false;
@@ -95,9 +98,12 @@ namespace TrainCrewMotorSound
                         isSMEECar = (state.CarStates[0].CarModel == "3020");
                         isSMEECarEB = (state.Bnotch == 9);
                         isReverserOff = state.Reverser == 0;
+                        isPower = state.CarStates.Average(x => x.Ampare) > 0;
+                        isRegenerater = state.CarStates.Average(x => x.Ampare) < 0;
+                        isBCPress = state.CarStates.Average(x => x.BC_Press) > 0;
                         isMute = IsRegenerationOffAtEB && ((isSMEECar && isSMEECarEB) || (!isSMEECar && state.Lamps[PanelLamp.EmagencyBrake]));
-                        isAcc = !isMute && ((IsNotchLinked && !isReverserOff && state.Pnotch > 0 && speed > 0.0f) || (!IsNotchLinked && speed > 0.0f));
-                        isDec = !isMute && (iRegenerationLimit <= speed) && ((IsNotchLinked && !isReverserOff && state.Bnotch > 0 && speed > 0.0f));
+                        isAcc = !isMute && ((IsNotchLinked && !isReverserOff && state.Pnotch > 0 && speed > 0.0f) || (!IsNotchLinked && isPower && speed > 0.0f));
+                        isDec = !isMute && (iRegenerationLimit <= speed) && ((IsNotchLinked && !isReverserOff && state.Bnotch > 0 && speed > 0.0f) || (!IsNotchLinked && (isRegenerater || isBCPress) && speed > 0.0f));
                     }
                 }
 
