@@ -79,6 +79,7 @@ namespace TrainCrewMotorSound
                 float speed = 0.0f;
                 bool isSMEECar = false;
                 bool isSMEECarEB = false;
+                bool isSMEEBrake = false;
                 bool isReverserOff = false;
                 bool isPower = false;
                 bool isRegenerater = false;
@@ -100,9 +101,10 @@ namespace TrainCrewMotorSound
                         isReverserOff = state.Reverser == 0;
                         isPower = state.CarStates.Average(x => x.Ampare) > 0;
                         isRegenerater = state.CarStates.Average(x => x.Ampare) < 0;
-                        isBCPress = state.CarStates.Average(x => x.BC_Press) > 0;
+                        isBCPress = state.CarStates.Average(x => x.BC_Press) > 1;
+                        isSMEEBrake = state.CarStates.Average(x => x.Ampare) > 0 && isBCPress;
                         isMute = IsRegenerationOffAtEB && ((isSMEECar && isSMEECarEB) || (!isSMEECar && state.Lamps[PanelLamp.EmagencyBrake]));
-                        isAcc = !isMute && ((IsNotchLinked && !isReverserOff && state.Pnotch != 0 && speed > 0.0f) || (!IsNotchLinked && isPower && speed > 0.0f));
+                        isAcc = !isMute && ((IsNotchLinked && !isReverserOff && state.Pnotch != 0 && speed > 0.0f) || (!IsNotchLinked && ((isSMEECar && !isSMEEBrake && isPower) || (!isSMEECar && isPower)) && speed > 0.0f));
                         isDec = !isMute && (iRegenerationLimit <= speed) && ((IsNotchLinked && !isReverserOff && state.Bnotch != 0 && speed > 0.0f) || (!IsNotchLinked && (isRegenerater || isBCPress) && speed > 0.0f));
                     }
                 }
@@ -1099,7 +1101,7 @@ namespace TrainCrewMotorSound
         /// <param name="value"></param>
         private void ApplyFade(float value)
         {
-            Console.WriteLine($"Current fade value: {value}");
+            //Console.WriteLine($"Current fade value: {value}");
             sound.fFadeVolume = value;
         }
 
