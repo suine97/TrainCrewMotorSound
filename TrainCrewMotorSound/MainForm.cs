@@ -23,6 +23,7 @@ namespace TrainCrewMotorSound
         private bool IsDeceleration = false;
         private bool IsNotchLinked = true;
         private bool IsRegenerationOffAtEB = true;
+        private bool wasSoundPlaying = false;
         private string vehicleDirectoryName = "";
         private string soundDirectoryName = "";
         private string motorNoiseDirectoryName = "";
@@ -84,6 +85,8 @@ namespace TrainCrewMotorSound
                 bool isPower = false;
                 bool isRegenerater = false;
                 bool isBCPress = false;
+                bool isPNotch = false;
+                bool isBNotch = false;
                 bool isMute = true;
                 bool isAcc = false;
                 bool isDec = false;
@@ -103,13 +106,40 @@ namespace TrainCrewMotorSound
                         isRegenerater = state.CarStates.Average(x => x.Ampare) < 0;
                         isBCPress = state.CarStates.Average(x => x.BC_Press) > 1;
                         isSMEEBrake = state.CarStates.Average(x => x.Ampare) > 0 && isBCPress;
-                        isMute = IsRegenerationOffAtEB && ((isSMEECar && isSMEECarEB) || (!isSMEECar && state.Lamps[PanelLamp.EmagencyBrake]));
-                        isAcc = !isMute && ((IsNotchLinked && !isReverserOff && state.Pnotch != 0 && speed > 0.0f) || (!IsNotchLinked && ((isSMEECar && !isSMEEBrake && isPower) || (!isSMEECar && isPower)) && speed > 0.0f));
-                        isDec = !isMute && (iRegenerationLimit <= speed) && ((IsNotchLinked && !isReverserOff && state.Bnotch != 0 && speed > 0.0f) || (!IsNotchLinked && (isRegenerater || isBCPress) && speed > 0.0f));
+                        isPNotch = (state.Pnotch != 0 && speed > 0.0f);
+                        isBNotch = (state.Bnotch != 0 && speed > 0.0f);
+                        isMute = IsRegenerationOffAtEB
+                            && ((isSMEECar && isSMEECarEB)
+                            || (!isSMEECar && state.Lamps[PanelLamp.EmagencyBrake]));
+                        isAcc = !isMute
+                            && ((IsNotchLinked && !isReverserOff && isPNotch)
+                            || (!IsNotchLinked && ((isSMEECar && !isSMEEBrake && isPower) || (!isSMEECar && isPower)) && speed > 0.0f));
+                        isDec = !isMute
+                            && (iRegenerationLimit <= speed) && ((IsNotchLinked && !isReverserOff && isBNotch)
+                            || (!IsNotchLinked && (isRegenerater || isBCPress) && speed > 0.0f));
                     }
                 }
 
                 SuspendLayout();
+
+                // 速度が0の場合、音声を停止
+                if (speed <= 0.0f)
+                {
+                    if (wasSoundPlaying)
+                    {
+                        sound.SoundAllStop(sound.currentRunSoundIndex);
+                        wasSoundPlaying = false;
+                    }
+                }
+                // 速度が0以外で音声が停止状態の場合、1回だけ再生
+                else
+                {
+                    if (!wasSoundPlaying)
+                    {
+                        sound.SoundAllPlay(sound.currentRunSoundIndex);
+                        wasSoundPlaying = true;
+                    }
+                }
 
                 // Motorサウンド音量フェード処理
                 if (IsFadeIn && (isAcc || isDec))

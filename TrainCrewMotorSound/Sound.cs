@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Reflection;
 
 namespace TrainCrewMotorSound
 {
@@ -255,6 +256,33 @@ namespace TrainCrewMotorSound
                 // バッファをソースに渡して再生開始
                 sourceVoice.SubmitSourceBuffer(buffer, null);
                 sourceVoice.Start();
+            }
+        }
+
+        /// <summary>
+        /// 全音声停止メソッド
+        /// </summary>
+        /// <param name="runIndex"></param>
+        public void SoundAllStop(int runIndex)
+        {
+            // Motorサウンドを停止
+            for (int i = 0; i < motorSoundSource.Count; i++)
+            {
+                if (motorSoundSource[i] != null)
+                {
+                    motorSoundSource[i].Stop();
+                    motorSoundSource[i].FlushSourceBuffers();
+                }
+            }
+
+            // Runサウンドを停止
+            if (runSoundSource.Count > 0)
+            {
+                if (runIndex >= 0 && runIndex < runSoundSource.Count && runSoundSource[runIndex] != null)
+                {
+                    runSoundSource[runIndex].Stop();
+                    runSoundSource[runIndex].FlushSourceBuffers();
+                }
             }
         }
 
