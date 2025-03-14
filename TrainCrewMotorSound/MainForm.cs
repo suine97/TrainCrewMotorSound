@@ -565,6 +565,18 @@ namespace TrainCrewMotorSound
                     }
                 }
 
+                // Sound、MotorNoiseファイルが存在しない場合は警告を表示
+                if (string.IsNullOrEmpty(soundPath))
+                {
+                    MessageBox.Show("Soundファイルの読み込みに失敗しました。\n\nVehicleファイルの記述がBVE5形式になっている事を確認してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    throw new Exception();
+                }
+                else if (string.IsNullOrEmpty(motorNoisePath))
+                {
+                    MessageBox.Show("MotorNoiseファイルの読み込みに失敗しました。\n\nVehicleファイルの記述がBVE5形式になっている事を確認してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    throw new Exception();
+                }
+
                 // Soundファイル読み込み
                 if (!string.IsNullOrEmpty(soundPath))
                 {
