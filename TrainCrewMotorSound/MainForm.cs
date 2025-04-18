@@ -99,7 +99,7 @@ namespace TrainCrewMotorSound
                     if (state.CarStates.Count > 0)
                     {
                         speed = state.Speed;
-                        isSMEECar = (state.CarStates[0].CarModel == "3020");
+                        isSMEECar = (state.CarStates[0].CarModel == "3000") || (state.CarStates[0].CarModel == "3020");
                         isSMEECarEB = (state.Bnotch == 9);
                         isReverserOff = state.Reverser == 0;
                         isPower = state.CarStates.Average(x => x.Ampare) > 0;
@@ -154,62 +154,69 @@ namespace TrainCrewMotorSound
                 }
 
                 // 各Motorサウンドに対して値を設定
-                if (!IsDeceleration)
+                if (sound.IsMotorSoundFileLoaded)
                 {
-                    // 加速(音量)
-                    if (PowerVolumeData.Count > 0)
+                    if (!IsDeceleration)
                     {
-                        var strPowerVolumeValues = GetInterpolatedValuesForSpeed(PowerVolumeData, speed);
-                        for (int col = 0; col <= strPowerVolumeValues.Count - 1; col++)
+                        // 加速(音量)
+                        if (PowerVolumeData.Count > 0)
                         {
-                            int index = col;
-                            sound.SetVolume("MOTOR", index, strPowerVolumeValues[col]);
+                            var strPowerVolumeValues = GetInterpolatedValuesForSpeed(PowerVolumeData, speed);
+                            for (int col = 0; col <= strPowerVolumeValues.Count - 1; col++)
+                            {
+                                int index = col;
+                                sound.SetVolume("MOTOR", index, strPowerVolumeValues[col]);
+                            }
+                        }
+                        // 加速(ピッチ)
+                        if (PowerFrequencyData.Count > 0)
+                        {
+                            var strPowerFrequencyValues = GetInterpolatedValuesForSpeed(PowerFrequencyData, speed);
+                            for (int col = 0; col <= strPowerFrequencyValues.Count - 1; col++)
+                            {
+                                int index = col;
+                                sound.SetPitch("MOTOR", index, strPowerFrequencyValues[col]);
+                            }
                         }
                     }
-                    // 加速(ピッチ)
-                    if (PowerFrequencyData.Count > 0)
+                    else
                     {
-                        var strPowerFrequencyValues = GetInterpolatedValuesForSpeed(PowerFrequencyData, speed);
-                        for (int col = 0; col <= strPowerFrequencyValues.Count - 1; col++)
+                        // 減速(音量)
+                        if (BrakeVolumeData.Count > 0)
                         {
-                            int index = col;
-                            sound.SetPitch("MOTOR", index, strPowerFrequencyValues[col]);
+                            var strBrakeVolumeValues = GetInterpolatedValuesForSpeed(BrakeVolumeData, speed);
+                            for (int col = 0; col <= strBrakeVolumeValues.Count - 1; col++)
+                            {
+                                int index = col;
+                                sound.SetVolume("MOTOR", index, strBrakeVolumeValues[col]);
+                            }
+                        }
+                        // 減速(ピッチ)
+                        if (BrakeFrequencyData.Count > 0)
+                        {
+                            var strBrakeFrequencyValues = GetInterpolatedValuesForSpeed(BrakeFrequencyData, speed);
+                            for (int col = 0; col <= strBrakeFrequencyValues.Count - 1; col++)
+                            {
+                                int index = col;
+                                sound.SetPitch("MOTOR", index, strBrakeFrequencyValues[col]);
+                            }
                         }
                     }
                 }
-                else
-                {
-                    // 減速(音量)
-                    if (BrakeVolumeData.Count > 0)
-                    {
-                        var strBrakeVolumeValues = GetInterpolatedValuesForSpeed(BrakeVolumeData, speed);
-                        for (int col = 0; col <= strBrakeVolumeValues.Count - 1; col++)
-                        {
-                            int index = col;
-                            sound.SetVolume("MOTOR", index, strBrakeVolumeValues[col]);
-                        }
-                    }
-                    // 減速(ピッチ)
-                    if (BrakeFrequencyData.Count > 0)
-                    {
-                        var strBrakeFrequencyValues = GetInterpolatedValuesForSpeed(BrakeFrequencyData, speed);
-                        for (int col = 0; col <= strBrakeFrequencyValues.Count - 1; col++)
-                        {
-                            int index = col;
-                            sound.SetPitch("MOTOR", index, strBrakeFrequencyValues[col]);
-                        }
-                    }
-                }
+
                 // Runサウンドに対して値を設定
-                var runVolume = CustomMath.Lerp(0.0f, 0.0f, 90.0f, 1.0f, speed);
-                var runFrequency = CustomMath.Lerp(0.0f, 0.0f, 90.0f, 1.0f, speed);
-                if (runVolume > 1.0f) runVolume = 1.0f;
-                if (0.0f > runVolume) runVolume = 0.0f;
-                if (0.0f > runFrequency) runFrequency = 0.0f;
-                if (sound.currentRunSoundIndex >= 0)
+                if (sound.IsRunSoundFileLoaded)
                 {
-                    sound.SetVolume("RUN", sound.currentRunSoundIndex, runVolume);
-                    sound.SetPitch("RUN", sound.currentRunSoundIndex, runFrequency);
+                    var runVolume = CustomMath.Lerp(0.0f, 0.0f, 90.0f, 1.0f, speed);
+                    var runFrequency = CustomMath.Lerp(0.0f, 0.0f, 90.0f, 1.0f, speed);
+                    if (runVolume > 1.0f) runVolume = 1.0f;
+                    if (0.0f > runVolume) runVolume = 0.0f;
+                    if (0.0f > runFrequency) runFrequency = 0.0f;
+                    if (sound.currentRunSoundIndex >= 0)
+                    {
+                        sound.SetVolume("RUN", sound.currentRunSoundIndex, runVolume);
+                        sound.SetPitch("RUN", sound.currentRunSoundIndex, runFrequency);
+                    }
                 }
 
                 // Text更新
@@ -316,16 +323,19 @@ namespace TrainCrewMotorSound
                     InitializeRunSoundComboBox();
 
                     // 各CSVデータ読込・整形処理
-                    PowerVolumeData = ConvertCSVData(sound.PowerVolumePath);
-                    PowerFrequencyData = ConvertCSVData(sound.PowerFrequencyPath);
-                    BrakeVolumeData = ConvertCSVData(sound.BrakeVolumePath);
-                    BrakeFrequencyData = ConvertCSVData(sound.BrakeFrequencyPath);
+                    if (sound.IsMotorSoundFileLoaded)
+                    {
+                        PowerVolumeData = ConvertCSVData(sound.PowerVolumePath);
+                        PowerFrequencyData = ConvertCSVData(sound.PowerFrequencyPath);
+                        BrakeVolumeData = ConvertCSVData(sound.BrakeVolumePath);
+                        BrakeFrequencyData = ConvertCSVData(sound.BrakeFrequencyPath);
 
-                    //// CSVファイル書き出し
-                    //WriteCsv("PowerVolumeData.csv", PowerVolumeData);
-                    //WriteCsv("PowerFrequencyData.csv", PowerFrequencyData);
-                    //WriteCsv("BrakeVolumeData.csv", BrakeVolumeData);
-                    //WriteCsv("BrakeFrequencyData.csv", BrakeFrequencyData);
+                        //// CSVファイル書き出し
+                        //WriteCsv("PowerVolumeData.csv", PowerVolumeData);
+                        //WriteCsv("PowerFrequencyData.csv", PowerFrequencyData);
+                        //WriteCsv("BrakeVolumeData.csv", BrakeVolumeData);
+                        //WriteCsv("BrakeFrequencyData.csv", BrakeFrequencyData);
+                    }
                 }
                 catch
                 {
@@ -565,33 +575,38 @@ namespace TrainCrewMotorSound
                     }
                 }
 
-                // Sound、MotorNoiseファイルが存在しない場合は警告を表示
-                if (string.IsNullOrEmpty(soundPath))
-                {
-                    MessageBox.Show("Soundファイルの読み込みに失敗しました。\n\nVehicleファイルの記述がBVE5形式になっている事を確認してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    throw new Exception();
-                }
-                else if (string.IsNullOrEmpty(motorNoisePath))
-                {
-                    MessageBox.Show("MotorNoiseファイルの読み込みに失敗しました。\n\nVehicleファイルの記述がBVE5形式になっている事を確認してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    throw new Exception();
-                }
+                bool isSoundFileLoaded = false;
+                bool isMotorNoiseFileLoaded = false;
 
                 // Soundファイル読み込み
                 if (!string.IsNullOrEmpty(soundPath))
                 {
-                    ReadSoundFile(soundPath);
+                    isSoundFileLoaded = ReadSoundFile(soundPath);
                 }
 
                 // MotorNoiseファイル読み込み
                 if (!string.IsNullOrEmpty(motorNoisePath))
                 {
-                    ReadMotorNoiseFile(motorNoisePath);
+                    isMotorNoiseFileLoaded = ReadMotorNoiseFile(motorNoisePath);
+                }
+
+                // ファイル読込判定
+                if (isSoundFileLoaded && isMotorNoiseFileLoaded)
+                {
+                    MessageBox.Show("車両ファイルを正常に読み込みました。", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else if (isSoundFileLoaded)
+                {
+                    MessageBox.Show("音声ファイルの読み込みには成功しましたが、MotorNoiseファイルが見つかりませんでした。\n\n走行音のみ再生可能です。", "情報", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+                else
+                {
+                    MessageBox.Show("車両ファイルの読み込みに失敗しました。\n\nVehicleファイルの記述がBVE5形式になっている事を確認してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch
             {
-                MessageBox.Show("車両ファイルを読み込めませんでした。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("車両ファイルの読み込みに失敗しました。\n\nVehicleファイルの記述がBVE5形式になっている事を確認してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 throw;
             }
         }
@@ -616,7 +631,7 @@ namespace TrainCrewMotorSound
         /// Soundファイル読み込みメソッド
         /// </summary>
         /// <param name="filePath"></param>
-        private void ReadSoundFile(string filePath)
+        private bool ReadSoundFile(string filePath)
         {
             // ファイルのエンコーディング設定
             Encoding encoding = Encoding.UTF8;
@@ -705,10 +720,13 @@ namespace TrainCrewMotorSound
                 // Dictionaryに保存
                 sound.motorSoundData = motorData;
                 sound.runSoundData = runData;
+
+                return true;
             }
             catch
             {
                 MessageBox.Show("Soundファイルの読み込みに失敗しました。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
                 throw;
             }
         }
@@ -717,7 +735,7 @@ namespace TrainCrewMotorSound
         /// MotorNoiseファイル読み込みメソッド
         /// </summary>
         /// <param name="filePath"></param>
-        private void ReadMotorNoiseFile(string filePath)
+        private bool ReadMotorNoiseFile(string filePath)
         {
             // ファイルのエンコーディング設定
             Encoding encoding = Encoding.UTF8;
@@ -774,10 +792,12 @@ namespace TrainCrewMotorSound
                         }
                     }
                 }
+                return true;
             }
             catch
             {
                 MessageBox.Show("MotorNoiseファイルの読み込みに失敗しました。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
                 throw;
             }
         }
