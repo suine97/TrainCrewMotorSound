@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TrainCrew;
-using static System.Windows.Forms.AxHost;
 
 namespace TrainCrewMotorSound
 {
@@ -48,10 +47,6 @@ namespace TrainCrewMotorSound
             //Timer設定
             timer = InitializeTimer(50, Timer_Tick);
             timer500 = InitializeTimer(500, Timer500_Tick);
-
-            // 音声処理スレッド生成
-            sound.IsSoundThreadLoop = true;
-            var _ = Task.Run(() => { sound.SoundThread(); });
 
             // コンボボックス初期化
             InitializeRunSoundComboBox();
@@ -159,7 +154,7 @@ namespace TrainCrewMotorSound
                     if (!IsDeceleration)
                     {
                         // 加速(音量)
-                        if (PowerVolumeData.Count > 0)
+                        if (PowerVolumeData != null && PowerVolumeData.Count > 0)
                         {
                             var strPowerVolumeValues = GetInterpolatedValuesForSpeed(PowerVolumeData, speed);
                             for (int col = 0; col <= strPowerVolumeValues.Count - 1; col++)
@@ -169,7 +164,7 @@ namespace TrainCrewMotorSound
                             }
                         }
                         // 加速(ピッチ)
-                        if (PowerFrequencyData.Count > 0)
+                        if (PowerFrequencyData != null && PowerFrequencyData.Count > 0)
                         {
                             var strPowerFrequencyValues = GetInterpolatedValuesForSpeed(PowerFrequencyData, speed);
                             for (int col = 0; col <= strPowerFrequencyValues.Count - 1; col++)
@@ -182,7 +177,7 @@ namespace TrainCrewMotorSound
                     else
                     {
                         // 減速(音量)
-                        if (BrakeVolumeData.Count > 0)
+                        if (BrakeVolumeData != null && BrakeVolumeData.Count > 0)
                         {
                             var strBrakeVolumeValues = GetInterpolatedValuesForSpeed(BrakeVolumeData, speed);
                             for (int col = 0; col <= strBrakeVolumeValues.Count - 1; col++)
@@ -192,7 +187,7 @@ namespace TrainCrewMotorSound
                             }
                         }
                         // 減速(ピッチ)
-                        if (BrakeFrequencyData.Count > 0)
+                        if (BrakeFrequencyData != null && BrakeFrequencyData.Count > 0)
                         {
                             var strBrakeFrequencyValues = GetInterpolatedValuesForSpeed(BrakeFrequencyData, speed);
                             for (int col = 0; col <= strBrakeFrequencyValues.Count - 1; col++)
@@ -325,10 +320,10 @@ namespace TrainCrewMotorSound
                     // 各CSVデータ読込・整形処理
                     if (sound.IsMotorSoundFileLoaded)
                     {
-                        PowerVolumeData = ConvertCSVData(sound.PowerVolumePath);
-                        PowerFrequencyData = ConvertCSVData(sound.PowerFrequencyPath);
-                        BrakeVolumeData = ConvertCSVData(sound.BrakeVolumePath);
-                        BrakeFrequencyData = ConvertCSVData(sound.BrakeFrequencyPath);
+                        PowerVolumeData = sound.PowerVolumePath != null ? ConvertCSVData(sound.PowerVolumePath) : null;
+                        PowerFrequencyData = sound.PowerFrequencyPath != null ? ConvertCSVData(sound.PowerFrequencyPath) : null;
+                        BrakeVolumeData = sound.BrakeVolumePath != null ? ConvertCSVData(sound.BrakeVolumePath) : null;
+                        BrakeFrequencyData = sound.BrakeFrequencyPath != null ? ConvertCSVData(sound.BrakeFrequencyPath) : null;
 
                         //// CSVファイル書き出し
                         //WriteCsv("PowerVolumeData.csv", PowerVolumeData);
@@ -440,7 +435,6 @@ namespace TrainCrewMotorSound
         /// <param name="e"></param>
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            sound.IsSoundThreadLoop = false;
             sound.Dispose();
             TrainCrewInput.Dispose();
         }
@@ -500,10 +494,10 @@ namespace TrainCrewMotorSound
             soundPath = "";
             motorNoisePath = "";
 
-            PowerVolumeData.Clear();
-            PowerFrequencyData.Clear();
-            BrakeVolumeData.Clear();
-            BrakeFrequencyData.Clear();
+            PowerVolumeData?.Clear();
+            PowerFrequencyData?.Clear();
+            BrakeVolumeData?.Clear();
+            BrakeFrequencyData?.Clear();
 
             ComboBox_RunSound.Items.Clear();
             ComboBox_RunSound.SelectedIndex = -1;

@@ -2,9 +2,7 @@
 using SharpDX.Multimedia;
 using System.IO;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Reflection;
 
 namespace TrainCrewMotorSound
 {
@@ -22,7 +20,6 @@ namespace TrainCrewMotorSound
         public Dictionary<int, string> motorSoundData = new Dictionary<int, string>();
         public Dictionary<int, string> runSoundData = new Dictionary<int, string>();
         public int currentRunSoundIndex = -1;
-        public bool IsSoundThreadLoop = false;
         public bool IsMotorSoundFileLoaded = false;
         public bool IsRunSoundFileLoaded = false;
         public float fMotorMasterVolume = 1.0f;
@@ -47,22 +44,6 @@ namespace TrainCrewMotorSound
             catch
             {
                 MessageBox.Show("サウンドデバイスの生成に失敗しました。", "エラー");
-            }
-        }
-
-        /// <summary>
-        /// 音声処理スレッド
-        /// </summary>
-        public async void SoundThread()
-        {
-            while (IsSoundThreadLoop)
-            {
-                // 50msごとに処理
-                await Task.Delay(50);
-
-                // サウンド読み込み判定
-                IsMotorSoundFileLoaded = (motorSoundSource.Count > 0);
-                IsRunSoundFileLoaded = (runSoundSource.Count > 0);
             }
         }
 
@@ -120,6 +101,8 @@ namespace TrainCrewMotorSound
                     motorSoundBuffer[index] = buffer;
                 }
             }
+            // サウンド読み込み判定
+            IsMotorSoundFileLoaded = (motorSoundSource.Count > 0);
 
             // Runサウンド読み込み
             foreach (var entry in runSoundData)
@@ -167,6 +150,8 @@ namespace TrainCrewMotorSound
                     runSoundBuffer[index] = buffer;
                 }
             }
+            // サウンド読み込み判定
+            IsRunSoundFileLoaded = (runSoundSource.Count > 0);
         }
 
         /// <summary>
