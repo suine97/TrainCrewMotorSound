@@ -906,7 +906,7 @@ namespace TrainCrewMotorSound
 
             for (int col = 1; col < data[0].Count; col++)
             {
-                for (int i = 0; i < rowCount; i++)
+                for (int i = 0; i < rowCount; 　i++)
                 {
                     if (!data[i][col].HasValue && data[i][0].HasValue)
                     {
@@ -930,8 +930,16 @@ namespace TrainCrewMotorSound
                                 }
                                 else if (secondLowerValue == null)
                                 {
-                                    secondLowerValue = data[j][col];
-                                    secondLowerSpeed = data[j][0].Value;
+                                    // 1番目のSpeedと同じ場合はスキップ
+                                    if (lowerSpeed == data[j][0].Value)
+                                    {
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        secondLowerValue = data[j][col];
+                                        secondLowerSpeed = data[j][0].Value;
+                                    }
                                     break;
                                 }
                             }
@@ -958,7 +966,7 @@ namespace TrainCrewMotorSound
                                 data[i][col] = lowerValue.Value;
                             }
                             else
-                            {
+                            　{
                                 data[i][col] = CustomMath.Lerp(lowerSpeed, lowerValue.Value, upperSpeed, upperValue.Value, data[i][0].Value);
                             }
                         }
