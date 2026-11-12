@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TrainCrew;
@@ -32,6 +32,8 @@ namespace TrainCrewMotorSound
         private List<List<float?>> PowerFrequencyData = new List<List<float?>>();
         private List<List<float?>> BrakeVolumeData = new List<List<float?>>();
         private List<List<float?>> BrakeFrequencyData = new List<List<float?>>();
+        // コンボボックスの選択位置 → [Run]セクションの番号 の対応表
+        private readonly List<int> runSoundIndexMap = new List<int>();
 
         /// <summary>
         /// コンストラクタ
@@ -151,50 +153,27 @@ namespace TrainCrewMotorSound
                 // 各Motorサウンドに対して値を設定
                 if (sound.IsMotorSoundFileLoaded)
                 {
-                    if (!IsDeceleration)
+                    var volumeData = IsDeceleration ? BrakeVolumeData : PowerVolumeData;
+                    var frequencyData = IsDeceleration ? BrakeFrequencyData : PowerFrequencyData;
+                    int motorCount = sound.motorSoundSource.Count;
+
+                    // 音量 (テーブルが無い側・テーブルに列が無い音は音量0にする)
+                    List<float> volumeValues = (volumeData != null && volumeData.Count > 0)
+                        ? GetInterpolatedValuesForSpeed(volumeData, speed)
+                        : null;
+                    for (int index = 0; index < motorCount; index++)
                     {
-                        // 加速(音量)
-                        if (PowerVolumeData != null && PowerVolumeData.Count > 0)
-                        {
-                            var strPowerVolumeValues = GetInterpolatedValuesForSpeed(PowerVolumeData, speed);
-                            for (int col = 0; col <= strPowerVolumeValues.Count - 1; col++)
-                            {
-                                int index = col;
-                                sound.SetVolume("MOTOR", index, strPowerVolumeValues[col]);
-                            }
-                        }
-                        // 加速(ピッチ)
-                        if (PowerFrequencyData != null && PowerFrequencyData.Count > 0)
-                        {
-                            var strPowerFrequencyValues = GetInterpolatedValuesForSpeed(PowerFrequencyData, speed);
-                            for (int col = 0; col <= strPowerFrequencyValues.Count - 1; col++)
-                            {
-                                int index = col;
-                                sound.SetPitch("MOTOR", index, strPowerFrequencyValues[col]);
-                            }
-                        }
+                        float volume = (volumeValues != null && index < volumeValues.Count) ? volumeValues[index] : 0.0f;
+                        sound.SetVolume("MOTOR", index, volume);
                     }
-                    else
+
+                    // ピッチ
+                    if (frequencyData != null && frequencyData.Count > 0)
                     {
-                        // 減速(音量)
-                        if (BrakeVolumeData != null && BrakeVolumeData.Count > 0)
+                        var frequencyValues = GetInterpolatedValuesForSpeed(frequencyData, speed);
+                        for (int index = 0; index < frequencyValues.Count; index++)
                         {
-                            var strBrakeVolumeValues = GetInterpolatedValuesForSpeed(BrakeVolumeData, speed);
-                            for (int col = 0; col <= strBrakeVolumeValues.Count - 1; col++)
-                            {
-                                int index = col;
-                                sound.SetVolume("MOTOR", index, strBrakeVolumeValues[col]);
-                            }
-                        }
-                        // 減速(ピッチ)
-                        if (BrakeFrequencyData != null && BrakeFrequencyData.Count > 0)
-                        {
-                            var strBrakeFrequencyValues = GetInterpolatedValuesForSpeed(BrakeFrequencyData, speed);
-                            for (int col = 0; col <= strBrakeFrequencyValues.Count - 1; col++)
-                            {
-                                int index = col;
-                                sound.SetPitch("MOTOR", index, strBrakeFrequencyValues[col]);
-                            }
+                            sound.SetPitch("MOTOR", index, frequencyValues[index]);
                         }
                     }
                 }
@@ -306,13 +285,13 @@ namespace TrainCrewMotorSound
                     vehicleDirectoryName = Path.GetDirectoryName(filePath) + "\\";
                     // カレンドディレクトリに設定
                     Environment.CurrentDirectory = Path.GetDirectoryName(filePath);
-                    ReadVehicleFile(filePath);
+                    ReadVehicleFile(filePath, out bool isSoundFileLoaded, out bool isMotorNoiseFileLoaded);
 
                     // 音声ファイル読み込み
                     sound.LoadSoundFiles();
 
-                    // 全音声を再生
-                    sound.SoundAllPlay(0);
+                    // Motorサウンドを再生 (Runサウンドはコンボボックス選択時に再生する)
+                    sound.SoundAllPlay(-1);
 
                     // コンボボックス更新
                     InitializeRunSoundComboBox();
@@ -331,11 +310,27 @@ namespace TrainCrewMotorSound
                         //WriteCsv("BrakeVolumeData.csv", BrakeVolumeData);
                         //WriteCsv("BrakeFrequencyData.csv", BrakeFrequencyData);
                     }
+
+                    // ファイル読込判定 (全ての読み込みが終わってから表示する)
+                    if (isSoundFileLoaded && isMotorNoiseFileLoaded)
+                    {
+                        MessageBox.Show("車両ファイルを正常に読み込みました。", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else if (isSoundFileLoaded)
+                    {
+                        MessageBox.Show("音声ファイルの読み込みには成功しましたが、MotorNoiseファイルが見つかりませんでした。\n\n走行音のみ再生可能です。", "情報", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    }
+                    else
+                    {
+                        MessageBox.Show("車両ファイルの読み込みに失敗しました。\n\nVehicleファイルの記述がBVE5/BVE6形式になっている事を確認してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
-                catch
+                catch (Exception ex)
                 {
                     // ファイルデータ初期化
                     ClearAllFileData();
+
+                    MessageBox.Show("車両ファイルの読み込みに失敗しました。\n\n" + ex.Message, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
         }
@@ -347,9 +342,11 @@ namespace TrainCrewMotorSound
         /// <param name="e"></param>
         private void ComboBox_RunSound_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (ComboBox_RunSound.SelectedIndex != -1)
+            int comboIndex = ComboBox_RunSound.SelectedIndex;
+            if (comboIndex >= 0 && comboIndex < runSoundIndexMap.Count)
             {
-                int selectedRunSoundIndex = ComboBox_RunSound.SelectedIndex;
+                // コンボボックスの選択位置を[Run]セクションの番号に変換
+                int selectedRunSoundIndex = runSoundIndexMap[comboIndex];
 
                 // 現在再生中のrunSoundSourceを停止
                 if (sound.currentRunSoundIndex != -1 && sound.currentRunSoundIndex != selectedRunSoundIndex)
@@ -463,12 +460,14 @@ namespace TrainCrewMotorSound
         {
             // コンボボックスにアイテムを追加
             ComboBox_RunSound.Items.Clear();
+            runSoundIndexMap.Clear();
             for (int i = 0; i < sound.runSoundSource.Count; i++)
             {
                 // nullチェック
                 if (sound.runSoundSource[i] != null)
                 {
                     ComboBox_RunSound.Items.Add(Path.GetFileName(sound.runSoundData[i]));
+                    runSoundIndexMap.Add(i);
                 }
             }
 
@@ -501,145 +500,38 @@ namespace TrainCrewMotorSound
 
             ComboBox_RunSound.Items.Clear();
             ComboBox_RunSound.SelectedIndex = -1;
+            runSoundIndexMap.Clear();
 
             sound.ClearSoundData();
+            sound.currentRunSoundIndex = -1;
+            sound.PowerVolumePath = null;
+            sound.PowerFrequencyPath = null;
+            sound.BrakeVolumePath = null;
+            sound.BrakeFrequencyPath = null;
             sound.motorSoundData.Clear();
             sound.runSoundData.Clear();
         }
 
         /// <summary>
-        /// Vehicleファイル読み込みメソッド
+        /// BVEの設定ファイルを読み込むメソッド
+        /// (1行目のヘッダーに ":文字コード名" があればその文字コードで、無ければUTF-8で読み込む)
         /// </summary>
-        /// <param name="filePath"></param>
-        private void ReadVehicleFile(string filePath)
-        {
-            try
-            {
-                // ファイルのエンコーディング設定
-                Encoding encoding = Encoding.UTF8;
-                string firstLine = File.ReadLines(filePath).FirstOrDefault();
-
-                // "BVETS VEHICLE" の行が存在し、エンコーディング情報が含まれているか確認
-                if (firstLine != null && firstLine.ToUpper().StartsWith("BVETS VEHICLE"))
-                {
-                    string[] parts = firstLine.Split(':');
-                    if (parts.Length == 2)
-                    {
-                        try
-                        {
-                            encoding = Encoding.GetEncoding(parts[1].Trim());
-                        }
-                        catch (ArgumentException)
-                        {
-                            encoding = Encoding.UTF8;
-                        }
-                    }
-                }
-
-                // エンコーディングを使ってファイルを読み込む
-                string[] lines = File.ReadAllLines(filePath, encoding);
-                string[] firstLineParts = lines[0]
-                        .Replace(":", " ")
-                        .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                // "Bvets Vehicle バージョン番号" の形式になっているか確認
-                if (lines.Length == 0 || !lines[0].ToUpper().StartsWith("BVETS VEHICLE") || firstLineParts.Length < 3 || !double.TryParse(firstLineParts[2], out _))
-                {
-                    MessageBox.Show(Path.GetFileName(filePath) + "は\nBVE5の車両ファイルではありません。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    throw new Exception();
-                }
-
-                // 正規表現でSoundやMotorNoiseのパスを抽出
-                foreach (string line in lines)
-                {
-                    var soundMatch = Regex.Match(line, @"^Sound\s*=\s*(.+)$", RegexOptions.IgnoreCase);
-                    var motorNoiseMatch = Regex.Match(line, @"^MotorNoise\s*=\s*(.+)$", RegexOptions.IgnoreCase);
-
-                    if (soundMatch.Success)
-                    {
-                        string extractedPath = soundMatch.Groups[1].Value.Trim();
-                        soundPath = ConvertToFullPathIfRelative(vehicleDirectoryName, extractedPath);
-                        soundDirectoryName = Path.GetDirectoryName(soundPath) + "\\";
-                    }
-                    else if (motorNoiseMatch.Success)
-                    {
-                        string extractedPath = motorNoiseMatch.Groups[1].Value.Trim();
-                        motorNoisePath = ConvertToFullPathIfRelative(vehicleDirectoryName, extractedPath);
-                        motorNoiseDirectoryName = Path.GetDirectoryName(motorNoisePath) + "\\";
-                    }
-                }
-
-                bool isSoundFileLoaded = false;
-                bool isMotorNoiseFileLoaded = false;
-
-                // Soundファイル読み込み
-                if (!string.IsNullOrEmpty(soundPath))
-                {
-                    isSoundFileLoaded = ReadSoundFile(soundPath);
-                }
-
-                // MotorNoiseファイル読み込み
-                if (!string.IsNullOrEmpty(motorNoisePath))
-                {
-                    isMotorNoiseFileLoaded = ReadMotorNoiseFile(motorNoisePath);
-                }
-
-                // ファイル読込判定
-                if (isSoundFileLoaded && isMotorNoiseFileLoaded)
-                {
-                    MessageBox.Show("車両ファイルを正常に読み込みました。", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else if (isSoundFileLoaded)
-                {
-                    MessageBox.Show("音声ファイルの読み込みには成功しましたが、MotorNoiseファイルが見つかりませんでした。\n\n走行音のみ再生可能です。", "情報", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                }
-                else
-                {
-                    MessageBox.Show("車両ファイルの読み込みに失敗しました。\n\nVehicleファイルの記述がBVE5形式になっている事を確認してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-            }
-            catch
-            {
-                MessageBox.Show("車両ファイルの読み込みに失敗しました。\n\nVehicleファイルの記述がBVE5形式になっている事を確認してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// 相対パスからフルパスに変換するメソッド
-        /// </summary>
-        /// <param name="baseDirectory"></param>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        private string ConvertToFullPathIfRelative(string baseDirectory, string filePath)
+        private static string[] ReadBveTextFile(string filePath)
         {
-            if (!Path.IsPathRooted(filePath))
-            {
-                // 相対パスなのでフルパスに変換
-                return Path.GetFullPath(Path.Combine(baseDirectory, filePath));
-            }
-            return filePath;  // すでにフルパスの場合はそのまま返す
-        }
-
-        /// <summary>
-        /// Soundファイル読み込みメソッド
-        /// </summary>
-        /// <param name="filePath"></param>
-        private bool ReadSoundFile(string filePath)
-        {
-            // ファイルのエンコーディング設定
             Encoding encoding = Encoding.UTF8;
             string firstLine = File.ReadLines(filePath).FirstOrDefault();
 
-            // "BVETS VEHICLE" の行が存在し、エンコーディング情報が含まれているか確認
-            if (firstLine != null && firstLine.ToUpper().StartsWith("BVETS VEHICLE"))
+            // "BveTs ～" のヘッダー行が存在し、エンコーディング情報が含まれているか確認
+            if (firstLine != null && firstLine.TrimStart().StartsWith("BVETS", StringComparison.OrdinalIgnoreCase))
             {
-                string[] parts = firstLine.Split(':');
-                if (parts.Length == 2)
+                int pos = firstLine.IndexOf(':');
+                if (pos >= 0)
                 {
                     try
                     {
-                        encoding = Encoding.GetEncoding(parts[1].Trim());
+                        encoding = Encoding.GetEncoding(StripComment(firstLine.Substring(pos + 1)));
                     }
                     catch (ArgumentException)
                     {
@@ -648,68 +540,188 @@ namespace TrainCrewMotorSound
                 }
             }
 
-            // ファイルの読み込み
-            var motorData = new Dictionary<int, string>();
-            var runData = new Dictionary<int, string>();
-            string[] lines = File.ReadAllLines(filePath, encoding);
+            return File.ReadAllLines(filePath, encoding);
+        }
 
-            bool isMotorSection = false;
-            bool isRunSection = false;
+        /// <summary>
+        /// コメントと前後の空白を取り除くメソッド
+        /// (";" 以降、および行頭が "#" の行をコメントとして扱う)
+        /// </summary>
+        /// <param name="rawLine"></param>
+        /// <returns></returns>
+        private static string StripComment(string rawLine)
+        {
+            string line = rawLine.Split(';')[0].Trim();
+            return line.StartsWith("#") ? "" : line;
+        }
+
+        /// <summary>
+        /// "[セクション名]" の行からセクション名を取得するメソッド
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="sectionName"></param>
+        /// <returns></returns>
+        private static bool TryParseSection(string line, out string sectionName)
+        {
+            sectionName = null;
+            if (line.Length >= 2 && line.StartsWith("[") && line.EndsWith("]"))
+            {
+                sectionName = line.Substring(1, line.Length - 2).Trim();
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// "キー = 値" の行からキーと値を取得するメソッド
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static bool TryParseKeyValue(string line, out string key, out string value)
+        {
+            key = null;
+            value = null;
+            int pos = line.IndexOf('=');
+            if (pos <= 0) return false;
+
+            key = line.Substring(0, pos).Trim();
+            value = line.Substring(pos + 1).Trim();
+            return key.Length > 0;
+        }
+
+        /// <summary>
+        /// 相対パスからフルパスに変換するメソッド
+        /// (値が空、またはパスとして不正な場合はnullを返す)
+        /// </summary>
+        /// <param name="baseDirectory"></param>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        private static string ConvertToFullPathIfRelative(string baseDirectory, string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath)) return null;
 
             try
             {
+                // 相対パスならフルパスに変換、すでにフルパスの場合はそのまま返す
+                return Path.IsPathRooted(filePath) ? filePath : Path.GetFullPath(Path.Combine(baseDirectory, filePath));
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is NotSupportedException || ex is PathTooLongException)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Vehicleファイル読み込みメソッド
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="isSoundFileLoaded">Soundファイルを読み込めたか</param>
+        /// <param name="isMotorNoiseFileLoaded">MotorNoiseファイルを読み込めたか</param>
+        private void ReadVehicleFile(string filePath, out bool isSoundFileLoaded, out bool isMotorNoiseFileLoaded)
+        {
+            isSoundFileLoaded = false;
+            isMotorNoiseFileLoaded = false;
+
+            // ヘッダーの文字コード指定に従ってファイルを読み込む
+            string[] lines = ReadBveTextFile(filePath);
+
+            // "Bvets Vehicle バージョン番号" の形式になっているか確認
+            string[] firstLineParts = lines.Length == 0
+                ? new string[0]
+                : lines[0].Split(':')[0].Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            if (firstLineParts.Length < 3
+                || !firstLineParts[0].Equals("BVETS", StringComparison.OrdinalIgnoreCase)
+                || !firstLineParts[1].Equals("VEHICLE", StringComparison.OrdinalIgnoreCase)
+                || !double.TryParse(firstLineParts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+            {
+                throw new InvalidDataException(Path.GetFileName(filePath) + " はBVE5以降の車両ファイルではありません。");
+            }
+
+            // SoundやMotorNoiseのパスを抽出
+            foreach (string rawLine in lines)
+            {
+                if (!TryParseKeyValue(StripComment(rawLine), out string key, out string value)) continue;
+
+                if (key.Equals("Sound", StringComparison.OrdinalIgnoreCase))
+                {
+                    string fullPath = ConvertToFullPathIfRelative(vehicleDirectoryName, value);
+                    if (fullPath != null)
+                    {
+                        soundPath = fullPath;
+                        soundDirectoryName = Path.GetDirectoryName(soundPath) + "\\";
+                    }
+                }
+                else if (key.Equals("MotorNoise", StringComparison.OrdinalIgnoreCase))
+                {
+                    string fullPath = ConvertToFullPathIfRelative(vehicleDirectoryName, value);
+                    if (fullPath != null)
+                    {
+                        motorNoisePath = fullPath;
+                        motorNoiseDirectoryName = Path.GetDirectoryName(motorNoisePath) + "\\";
+                    }
+                }
+            }
+
+            // Soundファイル読み込み
+            if (!string.IsNullOrEmpty(soundPath))
+            {
+                if (!File.Exists(soundPath))
+                {
+                    throw new FileNotFoundException("Soundファイルが見つかりません:\n" + soundPath);
+                }
+                isSoundFileLoaded = ReadSoundFile(soundPath);
+            }
+
+            // MotorNoiseファイル読み込み (ファイルが無い場合は走行音のみ読み込む)
+            if (!string.IsNullOrEmpty(motorNoisePath) && File.Exists(motorNoisePath))
+            {
+                isMotorNoiseFileLoaded = ReadMotorNoiseFile(motorNoisePath);
+            }
+        }
+
+        /// <summary>
+        /// Soundファイル読み込みメソッド
+        /// </summary>
+        /// <param name="filePath"></param>
+        private bool ReadSoundFile(string filePath)
+        {
+            try
+            {
+                // ファイルの読み込み
+                var motorData = new Dictionary<int, string>();
+                var runData = new Dictionary<int, string>();
+                string[] lines = ReadBveTextFile(filePath);
+
+                Dictionary<int, string> currentSection = null;
+
                 foreach (string rawLine in lines)
                 {
-                    // 行内の ";" 以降を無視
-                    string line = rawLine.Split(';')[0].Trim();
+                    string line = StripComment(rawLine);
 
-                    // セクションの開始を確認
-                    if (line == "[Motor]")
+                    // セクションの開始を確認 (大文字小文字は区別しない)
+                    if (TryParseSection(line, out string sectionName))
                     {
-                        isMotorSection = true;
-                        isRunSection = false;
+                        if (sectionName.Equals("Motor", StringComparison.OrdinalIgnoreCase)) currentSection = motorData;
+                        else if (sectionName.Equals("Run", StringComparison.OrdinalIgnoreCase)) currentSection = runData;
+                        else currentSection = null; // 別セクション
                         continue;
                     }
-                    else if (line == "[Run]")
-                    {
-                        isMotorSection = false;
-                        isRunSection = true;
-                        continue;
-                    }
-                    // 別セクションならスキップし、セクション終了を示す
-                    else if ((line.StartsWith("[") && line.EndsWith("]")))
-                    {
-                        isMotorSection = false;
-                        isRunSection = false;
-                        continue;
-                    }
+                    if (currentSection == null) continue;
 
-                    // "[Motor]"セクションのデータを辞書に追加
-                    if (isMotorSection)
+                    // "[Motor]" "[Run]" セクションのデータを辞書に追加 (同じ番号は後の行を優先)
+                    if (TryParseKeyValue(line, out string key, out string value)
+                        && int.TryParse(key, NumberStyles.Integer, CultureInfo.InvariantCulture, out int index)
+                        && index >= 0)
                     {
-                        var parts = line.Split('=');
-                        if (parts.Length == 2 && int.TryParse(parts[0].Trim(), out int index))
+                        string fullPath = ConvertToFullPathIfRelative(soundDirectoryName, value);
+                        if (fullPath != null)
                         {
-                            string filePathValue = parts[1].Trim();
-                            motorData.Add(index, soundDirectoryName + filePathValue);
-                        }
-                    }
-
-                    // "[Run]"セクションのデータを辞書に追加
-                    if (isRunSection)
-                    {
-                        var parts = line.Split('=');
-                        if (parts.Length == 2 && int.TryParse(parts[0].Trim(), out int index))
-                        {
-                            string filePathValue = parts[1].Trim();
-                            runData.Add(index, soundDirectoryName + filePathValue);
+                            currentSection[index] = fullPath;
                         }
                     }
                 }
-
-                // Dictionary初期化
-                sound.motorSoundData.Clear();
-                sound.runSoundData.Clear();
 
                 // Dictionaryに保存
                 sound.motorSoundData = motorData;
@@ -721,7 +733,6 @@ namespace TrainCrewMotorSound
             {
                 MessageBox.Show("Soundファイルの読み込みに失敗しました。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
-                throw;
             }
         }
 
@@ -731,59 +742,59 @@ namespace TrainCrewMotorSound
         /// <param name="filePath"></param>
         private bool ReadMotorNoiseFile(string filePath)
         {
-            // ファイルのエンコーディング設定
-            Encoding encoding = Encoding.UTF8;
-
             // 変数初期化
             sound.PowerVolumePath = null;
             sound.PowerFrequencyPath = null;
             sound.BrakeVolumePath = null;
             sound.BrakeFrequencyPath = null;
 
-            // ファイルの読み込み
-            string[] lines = File.ReadAllLines(filePath, encoding);
-
             try
             {
+                // ファイルの読み込み
+                string[] lines = ReadBveTextFile(filePath);
+
+                // 現在のセクション (null:セクション無し, true:[Power], false:[Brake])
+                bool? isPowerSection = null;
+                bool isUnknownSection = false;
+
                 foreach (string rawLine in lines)
                 {
-                    // 行内の ";" 以降を無視
-                    string trimmedLine = rawLine.Split(';')[0].Trim();
+                    string line = StripComment(rawLine);
 
-                    // セクション名をスキップ
-                    if (trimmedLine.StartsWith("[") && trimmedLine.EndsWith("]"))
+                    // セクションの開始を確認 (大文字小文字は区別しない)
+                    if (TryParseSection(line, out string sectionName))
                     {
+                        isUnknownSection = false;
+                        if (sectionName.Equals("Power", StringComparison.OrdinalIgnoreCase)) isPowerSection = true;
+                        else if (sectionName.Equals("Brake", StringComparison.OrdinalIgnoreCase)) isPowerSection = false;
+                        else isUnknownSection = true;
                         continue;
                     }
+                    if (isUnknownSection) continue;
 
-                    // 空白行を無視
-                    if (string.IsNullOrWhiteSpace(trimmedLine))
+                    // キーと値を取得
+                    if (!TryParseKeyValue(line, out string key, out string value)) continue;
+
+                    bool isVolume = key.Equals("Volume", StringComparison.OrdinalIgnoreCase);
+                    bool isFrequency = key.Equals("Frequency", StringComparison.OrdinalIgnoreCase);
+                    if (!isVolume && !isFrequency) continue;
+
+                    string fullPath = ConvertToFullPathIfRelative(motorNoiseDirectoryName, value);
+                    if (fullPath == null) continue;
+
+                    // セクションが無いファイルは、1つ目を力行・2つ目を制動として扱う
+                    bool isPower = isPowerSection
+                        ?? (isVolume ? sound.PowerVolumePath == null : sound.PowerFrequencyPath == null);
+
+                    if (isVolume)
                     {
-                        continue;
+                        if (isPower) sound.PowerVolumePath = fullPath;
+                        else sound.BrakeVolumePath = fullPath;
                     }
-
-                    // キーと値を取得して適切な変数に格納
-                    var parts = trimmedLine.Split('=');
-                    if (parts.Length == 2)
+                    else
                     {
-                        string key = parts[0].Trim();
-                        string value = motorNoiseDirectoryName + parts[1].Trim();
-
-                        switch (key)
-                        {
-                            case "Volume" when sound.PowerVolumePath == null:
-                                sound.PowerVolumePath = value;
-                                break;
-                            case "Frequency" when sound.PowerFrequencyPath == null:
-                                sound.PowerFrequencyPath = value;
-                                break;
-                            case "Volume" when sound.PowerVolumePath != null:
-                                sound.BrakeVolumePath = value;
-                                break;
-                            case "Frequency" when sound.PowerFrequencyPath != null:
-                                sound.BrakeFrequencyPath = value;
-                                break;
-                        }
+                        if (isPower) sound.PowerFrequencyPath = fullPath;
+                        else sound.BrakeFrequencyPath = fullPath;
                     }
                 }
                 return true;
@@ -792,7 +803,6 @@ namespace TrainCrewMotorSound
             {
                 MessageBox.Show("MotorNoiseファイルの読み込みに失敗しました。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
-                throw;
             }
         }
 
@@ -802,6 +812,11 @@ namespace TrainCrewMotorSound
         /// <param name="filePath"></param>
         private List<List<float?>> ConvertCSVData(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("モータ音テーブルファイルが見つかりません:\n" + filePath);
+            }
+
             try
             {
                 // CSVファイル読込
@@ -809,6 +824,15 @@ namespace TrainCrewMotorSound
 
                 // 1列目がマイナス値の行を削除
                 RemoveNegativeRows(data);
+
+                // データ行が無い場合はテーブル無しとして扱う
+                if (data.Count == 0)
+                {
+                    return data;
+                }
+
+                // 全行の列数を最大列数に揃える
+                NormalizeColumnCount(data);
 
                 // 1列目で昇順にソートする
                 SortByFirstColumn(data);
@@ -826,8 +850,7 @@ namespace TrainCrewMotorSound
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Path.GetFileName(filePath) + " の読み込みに失敗しました。\n\n" + ex.ToString(), "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                throw;
+                throw new InvalidDataException(Path.GetFileName(filePath) + " の読み込みに失敗しました。\n" + ex.Message, ex);
             }
         }
 
@@ -839,25 +862,26 @@ namespace TrainCrewMotorSound
         private List<List<float?>> ReadCSVFile(string filePath)
         {
             var data = new List<List<float?>>();
-            bool isFirstLine = true; // ヘッダー行の判定
 
-            foreach (var line in File.ReadLines(filePath))
+            foreach (var rawLine in File.ReadLines(filePath))
             {
+                string line = rawLine.Trim();
+
                 // ヘッダー行を無視
-                if (isFirstLine)
+                if (line.StartsWith("BVETS", StringComparison.OrdinalIgnoreCase))
                 {
-                    isFirstLine = false;
                     continue;
                 }
 
                 // コメント行を無視
-                if (line.StartsWith("#"))
+                if (line.StartsWith("#") || line.StartsWith(";"))
                 {
                     continue;
                 }
 
+                // 数値はPCの地域設定に依存しない形式(小数点は".")で解釈する
                 var values = line.Split(',')
-                                 .Select(v => float.TryParse(v, out var num) ? (float?)num : null)
+                                 .Select(v => float.TryParse(v, NumberStyles.Float, CultureInfo.InvariantCulture, out var num) ? (float?)num : null)
                                  .ToList();
 
                 // 1列目が空白の場合は無視
@@ -878,6 +902,22 @@ namespace TrainCrewMotorSound
         private void RemoveNegativeRows(List<List<float?>> data)
         {
             data.RemoveAll(row => row[0].HasValue && row[0].Value < 0);
+        }
+
+        /// <summary>
+        /// 全行の列数を最大列数に揃える (足りない列は空白として扱う)
+        /// </summary>
+        /// <param name="data"></param>
+        private void NormalizeColumnCount(List<List<float?>> data)
+        {
+            int maxColumnCount = data.Max(row => row.Count);
+            foreach (var row in data)
+            {
+                while (row.Count < maxColumnCount)
+                {
+                    row.Add(null);
+                }
+            }
         }
 
         /// <summary>
@@ -965,8 +1005,8 @@ namespace TrainCrewMotorSound
                         // 前方のみ有効な値が見つかり、2番目の前方の値も見つかった場合
                         else if (foundLower && secondLowerValue.HasValue)
                         {
-                            // 値が 0 の場合、そのまま 0 を使う
-                            if (lowerValue.Value == 0)
+                            // 値が 0 の場合、または速度が同じで予測できない場合は、そのままの値を使う
+                            if (lowerValue.Value == 0 || secondLowerSpeed == lowerSpeed)
                             {
                                 data[i][col] = lowerValue.Value;  // 値が 0 の場合はそのまま使用
                             }
@@ -1050,8 +1090,9 @@ namespace TrainCrewMotorSound
         private List<float> GetInterpolatedValuesForSpeed(List<List<float?>> data, float speed)
         {
             // 速度列(1列目)から対応する前後のインデックスを取得
-            int lowerIndex = 0;
-            int upperIndex = 0;
+            // (速度が最終行を超える場合は最終行の値を使う)
+            int lowerIndex = data.Count - 1;
+            int upperIndex = data.Count - 1;
 
             for (int i = 0; i < data.Count; i++)
             {
