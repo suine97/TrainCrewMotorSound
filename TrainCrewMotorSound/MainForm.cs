@@ -15,6 +15,7 @@ namespace TrainCrewMotorSound
         private Timer timer;
         private Timer timer500;
         private Sound sound = new Sound();
+        private readonly AutoRun autoRun = new AutoRun();
         private readonly StringBuilder sb = new StringBuilder();
         private float fOldSpeed = 0.0f;
         private int iRegenerationLimit = 0;
@@ -58,6 +59,9 @@ namespace TrainCrewMotorSound
             }
             ComboBox_RegenerationLimit.SelectedIndex = 0;
 
+            // 自動走行モードの終了日時初期値 (現在日時+15分)
+            DateTimePicker_AutoRunEndTime.Value = DateTime.Now.AddMinutes(15);
+
             //初期化。起動時のみの呼び出しで大丈夫です。
             TrainCrewInput.Init();
         }
@@ -71,8 +75,10 @@ namespace TrainCrewMotorSound
         {
             try
             {
-                var state = TrainCrewInput.GetTrainState();
-                if (state == null) { return; }
+                // 自動走行モード中はTRAIN CREWの状態を使用しない
+                bool isAutoRun = autoRun.IsRunning;
+                var state = isAutoRun ? null : TrainCrewInput.GetTrainState();
+                if (!isAutoRun && state == null) { return; }
 
                 float speed = 0.0f;
                 bool isSMEECar = false;
@@ -88,8 +94,27 @@ namespace TrainCrewMotorSound
                 bool isAcc = false;
                 bool isDec = false;
 
+                if (isAutoRun)
+                {
+                    // 自動走行モード：内部で計算した速度と加速・減速状態を使用
+                    DateTime now = DateTime.Now;
+                    autoRun.Update(now);
+                    speed = (float)autoRun.Speed;
+                    isAcc = autoRun.IsAccelerating && speed > 0.0f;
+                    isDec = autoRun.IsBraking && (iRegenerationLimit <= speed) && speed > 0.0f;
+                    if (autoRun.IsBraking) IsDeceleration = true;
+                    else if (autoRun.IsAccelerating) IsDeceleration = false;
+
+                    UpdateAutoRunRemaining(now);
+
+                    // 自動走行が終了したら画面を元に戻す
+                    if (!autoRun.IsRunning)
+                    {
+                        SetAutoRunControls(false);
+                    }
+                }
                 //運転画面遷移なら処理
-                if (TrainCrewInput.gameState.gameScreen == GameScreen.MainGame
+                else if (TrainCrewInput.gameState.gameScreen == GameScreen.MainGame
                     || TrainCrewInput.gameState.gameScreen == GameScreen.MainGame_Pause
                     || TrainCrewInput.gameState.gameScreen == GameScreen.MainGame_Loading)
                 {
@@ -232,6 +257,13 @@ namespace TrainCrewMotorSound
         {
             try
             {
+                // 自動走行モード中は加速・減速判定を自動走行側で行う
+                if (autoRun.IsRunning)
+                {
+                    fOldSpeed = (float)autoRun.Speed;
+                    return;
+                }
+
                 var state = TrainCrewInput.GetTrainState();
                 if (state == null) { return; }
 
@@ -423,6 +455,136 @@ namespace TrainCrewMotorSound
         private void ComboBox_RegenerationLimit_SelectedIndexChanged(object sender, EventArgs e)
         {
             iRegenerationLimit = int.Parse(ComboBox_RegenerationLimit.SelectedItem.ToString().Trim());
+        }
+
+        /// <summary>
+        /// Button_AutoRun_Clickイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Button_AutoRun_Click(object sender, EventArgs e)
+        {
+            // 走行中：1回目は減速して停止、減速中の2回目は即時に打ち切る
+            if (autoRun.IsRunning)
+            {
+                if (!autoRun.IsStopRequested)
+                {
+                    autoRun.RequestStop();
+                    Button_AutoRun.Text = "即時停止";
+                }
+                else
+                {
+                    autoRun.Abort();
+                    SetAutoRunControls(false);
+                }
+                return;
+            }
+
+            // 入力値チェック
+            double maxSpeed = (double)NumericUpDown_AutoRunMaxSpeed.Value;
+            double lowerSpeed = (double)NumericUpDown_AutoRunLowerSpeed.Value;
+            if (lowerSpeed >= maxSpeed)
+            {
+                MessageBox.Show("下限速度は最高速度より低い値を指定してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 終了日時を決定 (指定なしの場合はnull)
+            DateTime now = DateTime.Now;
+            DateTime? endTime = null;
+            if (RadioButton_AutoRunDuration.Checked)
+            {
+                double seconds = (double)NumericUpDown_AutoRunMinutes.Value * 60.0 + (double)NumericUpDown_AutoRunSeconds.Value;
+                if (seconds <= 0.0)
+                {
+                    MessageBox.Show("走行時間を指定してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                endTime = now.AddSeconds(seconds);
+            }
+            else if (RadioButton_AutoRunEndTime.Checked)
+            {
+                endTime = DateTimePicker_AutoRunEndTime.Value;
+                if (endTime.Value <= now)
+                {
+                    MessageBox.Show("終了日時は現在より後の日時を指定してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+            autoRun.Start(
+                now,
+                (double)NumericUpDown_AutoRunAcceleration.Value,
+                (double)NumericUpDown_AutoRunDeceleration.Value,
+                maxSpeed,
+                lowerSpeed,
+                endTime);
+            SetAutoRunControls(true);
+            UpdateAutoRunRemaining(now);
+        }
+
+        /// <summary>
+        /// RadioButton_AutoRun_CheckedChangedイベント (終了条件の切り替え)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RadioButton_AutoRun_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!autoRun.IsRunning)
+            {
+                SetAutoRunControls(false);
+            }
+        }
+
+        /// <summary>
+        /// 自動走行モードの入力欄とボタンの状態を切り替えるメソッド
+        /// </summary>
+        /// <param name="isRunning">自動走行中か</param>
+        private void SetAutoRunControls(bool isRunning)
+        {
+            NumericUpDown_AutoRunAcceleration.Enabled = !isRunning;
+            NumericUpDown_AutoRunDeceleration.Enabled = !isRunning;
+            NumericUpDown_AutoRunMaxSpeed.Enabled = !isRunning;
+            NumericUpDown_AutoRunLowerSpeed.Enabled = !isRunning;
+            RadioButton_AutoRunDuration.Enabled = !isRunning;
+            RadioButton_AutoRunEndTime.Enabled = !isRunning;
+            RadioButton_AutoRunNoLimit.Enabled = !isRunning;
+
+            // 選択中の終了条件の入力欄のみ有効にする
+            NumericUpDown_AutoRunMinutes.Enabled = !isRunning && RadioButton_AutoRunDuration.Checked;
+            NumericUpDown_AutoRunSeconds.Enabled = !isRunning && RadioButton_AutoRunDuration.Checked;
+            DateTimePicker_AutoRunEndTime.Enabled = !isRunning && RadioButton_AutoRunEndTime.Checked;
+
+            Button_AutoRun.Text = isRunning ? "停止" : "開始";
+            if (!isRunning)
+            {
+                Label_AutoRunRemaining.Text = "残り時間：--:--";
+            }
+        }
+
+        /// <summary>
+        /// 自動走行モードの残り時間表示を更新するメソッド
+        /// </summary>
+        /// <param name="now">現在日時</param>
+        private void UpdateAutoRunRemaining(DateTime now)
+        {
+            TimeSpan? remaining = autoRun.GetRemainingTime(now);
+            string text = "残り時間：--:--";
+            if (remaining.HasValue)
+            {
+                // 秒未満は切り上げて表示
+                long totalSeconds = (long)Math.Ceiling(remaining.Value.TotalSeconds);
+                long hours = totalSeconds / 3600;
+                long minutes = (totalSeconds % 3600) / 60;
+                long seconds = totalSeconds % 60;
+                text = hours > 0
+                    ? $"残り時間：{hours}:{minutes:00}:{seconds:00}"
+                    : $"残り時間：{minutes:00}:{seconds:00}";
+            }
+            if (Label_AutoRunRemaining.Text != text)
+            {
+                Label_AutoRunRemaining.Text = text;
+            }
         }
 
         /// <summary>

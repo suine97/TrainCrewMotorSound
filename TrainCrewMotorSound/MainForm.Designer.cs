@@ -45,11 +45,41 @@
             this.GroupBox_Infomation = new System.Windows.Forms.GroupBox();
             this.CheckBox_NotchUnLinked = new System.Windows.Forms.CheckBox();
             this.CheckBox_EB = new System.Windows.Forms.CheckBox();
+            this.GroupBox_AutoRun = new System.Windows.Forms.GroupBox();
+            this.Label_AutoRunAcceleration = new System.Windows.Forms.Label();
+            this.NumericUpDown_AutoRunAcceleration = new System.Windows.Forms.NumericUpDown();
+            this.Label_AutoRunAcceleration_Unit = new System.Windows.Forms.Label();
+            this.Label_AutoRunDeceleration = new System.Windows.Forms.Label();
+            this.NumericUpDown_AutoRunDeceleration = new System.Windows.Forms.NumericUpDown();
+            this.Label_AutoRunDeceleration_Unit = new System.Windows.Forms.Label();
+            this.Label_AutoRunMaxSpeed = new System.Windows.Forms.Label();
+            this.NumericUpDown_AutoRunMaxSpeed = new System.Windows.Forms.NumericUpDown();
+            this.Label_AutoRunMaxSpeed_Unit = new System.Windows.Forms.Label();
+            this.Label_AutoRunLowerSpeed = new System.Windows.Forms.Label();
+            this.NumericUpDown_AutoRunLowerSpeed = new System.Windows.Forms.NumericUpDown();
+            this.Label_AutoRunLowerSpeed_Unit = new System.Windows.Forms.Label();
+            this.RadioButton_AutoRunDuration = new System.Windows.Forms.RadioButton();
+            this.NumericUpDown_AutoRunMinutes = new System.Windows.Forms.NumericUpDown();
+            this.Label_AutoRunMinutes_Unit = new System.Windows.Forms.Label();
+            this.NumericUpDown_AutoRunSeconds = new System.Windows.Forms.NumericUpDown();
+            this.Label_AutoRunSeconds_Unit = new System.Windows.Forms.Label();
+            this.RadioButton_AutoRunEndTime = new System.Windows.Forms.RadioButton();
+            this.DateTimePicker_AutoRunEndTime = new System.Windows.Forms.DateTimePicker();
+            this.RadioButton_AutoRunNoLimit = new System.Windows.Forms.RadioButton();
+            this.Label_AutoRunRemaining = new System.Windows.Forms.Label();
+            this.Button_AutoRun = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_MotorVolume)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_RunVolume)).BeginInit();
             this.GroupBox_MotorSound.SuspendLayout();
             this.GroupBox_RunSound.SuspendLayout();
             this.GroupBox_Infomation.SuspendLayout();
+            this.GroupBox_AutoRun.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunAcceleration)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunDeceleration)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunMaxSpeed)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunLowerSpeed)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunMinutes)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunSeconds)).BeginInit();
             this.SuspendLayout();
             // 
             // Button_OpenFile
@@ -258,11 +288,327 @@
             this.CheckBox_EB.UseVisualStyleBackColor = true;
             this.CheckBox_EB.CheckedChanged += new System.EventHandler(this.CheckBox_EB_CheckedChanged);
             // 
+            // GroupBox_AutoRun
+            // 
+            this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunAcceleration);
+            this.GroupBox_AutoRun.Controls.Add(this.NumericUpDown_AutoRunAcceleration);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunAcceleration_Unit);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunDeceleration);
+            this.GroupBox_AutoRun.Controls.Add(this.NumericUpDown_AutoRunDeceleration);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunDeceleration_Unit);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunMaxSpeed);
+            this.GroupBox_AutoRun.Controls.Add(this.NumericUpDown_AutoRunMaxSpeed);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunMaxSpeed_Unit);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunLowerSpeed);
+            this.GroupBox_AutoRun.Controls.Add(this.NumericUpDown_AutoRunLowerSpeed);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunLowerSpeed_Unit);
+            this.GroupBox_AutoRun.Controls.Add(this.RadioButton_AutoRunDuration);
+            this.GroupBox_AutoRun.Controls.Add(this.NumericUpDown_AutoRunMinutes);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunMinutes_Unit);
+            this.GroupBox_AutoRun.Controls.Add(this.NumericUpDown_AutoRunSeconds);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunSeconds_Unit);
+            this.GroupBox_AutoRun.Controls.Add(this.RadioButton_AutoRunEndTime);
+            this.GroupBox_AutoRun.Controls.Add(this.DateTimePicker_AutoRunEndTime);
+            this.GroupBox_AutoRun.Controls.Add(this.RadioButton_AutoRunNoLimit);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunRemaining);
+            this.GroupBox_AutoRun.Controls.Add(this.Button_AutoRun);
+            this.GroupBox_AutoRun.Location = new System.Drawing.Point(12, 281);
+            this.GroupBox_AutoRun.Name = "GroupBox_AutoRun";
+            this.GroupBox_AutoRun.Size = new System.Drawing.Size(410, 150);
+            this.GroupBox_AutoRun.TabIndex = 10;
+            this.GroupBox_AutoRun.TabStop = false;
+            this.GroupBox_AutoRun.Text = "自動走行モード";
+            // 
+            // Label_AutoRunAcceleration
+            // 
+            this.Label_AutoRunAcceleration.AutoSize = true;
+            this.Label_AutoRunAcceleration.Location = new System.Drawing.Point(8, 25);
+            this.Label_AutoRunAcceleration.Name = "Label_AutoRunAcceleration";
+            this.Label_AutoRunAcceleration.Size = new System.Drawing.Size(40, 12);
+            this.Label_AutoRunAcceleration.TabIndex = 11;
+            this.Label_AutoRunAcceleration.Text = "加速度";
+            // 
+            // NumericUpDown_AutoRunAcceleration
+            // 
+            this.NumericUpDown_AutoRunAcceleration.DecimalPlaces = 1;
+            this.NumericUpDown_AutoRunAcceleration.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.NumericUpDown_AutoRunAcceleration.Location = new System.Drawing.Point(68, 22);
+            this.NumericUpDown_AutoRunAcceleration.Name = "NumericUpDown_AutoRunAcceleration";
+            this.NumericUpDown_AutoRunAcceleration.Size = new System.Drawing.Size(60, 19);
+            this.NumericUpDown_AutoRunAcceleration.TabIndex = 12;
+            this.NumericUpDown_AutoRunAcceleration.Maximum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            65536});
+            this.NumericUpDown_AutoRunAcceleration.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.NumericUpDown_AutoRunAcceleration.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.NumericUpDown_AutoRunAcceleration.Value = new decimal(new int[] {
+            25,
+            0,
+            0,
+            65536});
+            // 
+            // Label_AutoRunAcceleration_Unit
+            // 
+            this.Label_AutoRunAcceleration_Unit.AutoSize = true;
+            this.Label_AutoRunAcceleration_Unit.Location = new System.Drawing.Point(133, 25);
+            this.Label_AutoRunAcceleration_Unit.Name = "Label_AutoRunAcceleration_Unit";
+            this.Label_AutoRunAcceleration_Unit.Size = new System.Drawing.Size(40, 12);
+            this.Label_AutoRunAcceleration_Unit.TabIndex = 13;
+            this.Label_AutoRunAcceleration_Unit.Text = "km/h/s";
+            // 
+            // Label_AutoRunDeceleration
+            // 
+            this.Label_AutoRunDeceleration.AutoSize = true;
+            this.Label_AutoRunDeceleration.Location = new System.Drawing.Point(206, 25);
+            this.Label_AutoRunDeceleration.Name = "Label_AutoRunDeceleration";
+            this.Label_AutoRunDeceleration.Size = new System.Drawing.Size(40, 12);
+            this.Label_AutoRunDeceleration.TabIndex = 14;
+            this.Label_AutoRunDeceleration.Text = "減速度";
+            // 
+            // NumericUpDown_AutoRunDeceleration
+            // 
+            this.NumericUpDown_AutoRunDeceleration.DecimalPlaces = 1;
+            this.NumericUpDown_AutoRunDeceleration.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.NumericUpDown_AutoRunDeceleration.Location = new System.Drawing.Point(266, 22);
+            this.NumericUpDown_AutoRunDeceleration.Name = "NumericUpDown_AutoRunDeceleration";
+            this.NumericUpDown_AutoRunDeceleration.Size = new System.Drawing.Size(60, 19);
+            this.NumericUpDown_AutoRunDeceleration.TabIndex = 15;
+            this.NumericUpDown_AutoRunDeceleration.Maximum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            65536});
+            this.NumericUpDown_AutoRunDeceleration.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.NumericUpDown_AutoRunDeceleration.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.NumericUpDown_AutoRunDeceleration.Value = new decimal(new int[] {
+            30,
+            0,
+            0,
+            65536});
+            // 
+            // Label_AutoRunDeceleration_Unit
+            // 
+            this.Label_AutoRunDeceleration_Unit.AutoSize = true;
+            this.Label_AutoRunDeceleration_Unit.Location = new System.Drawing.Point(331, 25);
+            this.Label_AutoRunDeceleration_Unit.Name = "Label_AutoRunDeceleration_Unit";
+            this.Label_AutoRunDeceleration_Unit.Size = new System.Drawing.Size(40, 12);
+            this.Label_AutoRunDeceleration_Unit.TabIndex = 16;
+            this.Label_AutoRunDeceleration_Unit.Text = "km/h/s";
+            // 
+            // Label_AutoRunMaxSpeed
+            // 
+            this.Label_AutoRunMaxSpeed.AutoSize = true;
+            this.Label_AutoRunMaxSpeed.Location = new System.Drawing.Point(8, 51);
+            this.Label_AutoRunMaxSpeed.Name = "Label_AutoRunMaxSpeed";
+            this.Label_AutoRunMaxSpeed.Size = new System.Drawing.Size(40, 12);
+            this.Label_AutoRunMaxSpeed.TabIndex = 17;
+            this.Label_AutoRunMaxSpeed.Text = "最高速度";
+            // 
+            // NumericUpDown_AutoRunMaxSpeed
+            // 
+            this.NumericUpDown_AutoRunMaxSpeed.Location = new System.Drawing.Point(68, 48);
+            this.NumericUpDown_AutoRunMaxSpeed.Name = "NumericUpDown_AutoRunMaxSpeed";
+            this.NumericUpDown_AutoRunMaxSpeed.Size = new System.Drawing.Size(60, 19);
+            this.NumericUpDown_AutoRunMaxSpeed.TabIndex = 18;
+            this.NumericUpDown_AutoRunMaxSpeed.Maximum = new decimal(new int[] {
+            300,
+            0,
+            0,
+            0});
+            this.NumericUpDown_AutoRunMaxSpeed.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.NumericUpDown_AutoRunMaxSpeed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.NumericUpDown_AutoRunMaxSpeed.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            // 
+            // Label_AutoRunMaxSpeed_Unit
+            // 
+            this.Label_AutoRunMaxSpeed_Unit.AutoSize = true;
+            this.Label_AutoRunMaxSpeed_Unit.Location = new System.Drawing.Point(133, 51);
+            this.Label_AutoRunMaxSpeed_Unit.Name = "Label_AutoRunMaxSpeed_Unit";
+            this.Label_AutoRunMaxSpeed_Unit.Size = new System.Drawing.Size(40, 12);
+            this.Label_AutoRunMaxSpeed_Unit.TabIndex = 19;
+            this.Label_AutoRunMaxSpeed_Unit.Text = "km/h";
+            // 
+            // Label_AutoRunLowerSpeed
+            // 
+            this.Label_AutoRunLowerSpeed.AutoSize = true;
+            this.Label_AutoRunLowerSpeed.Location = new System.Drawing.Point(206, 51);
+            this.Label_AutoRunLowerSpeed.Name = "Label_AutoRunLowerSpeed";
+            this.Label_AutoRunLowerSpeed.Size = new System.Drawing.Size(40, 12);
+            this.Label_AutoRunLowerSpeed.TabIndex = 20;
+            this.Label_AutoRunLowerSpeed.Text = "下限速度";
+            // 
+            // NumericUpDown_AutoRunLowerSpeed
+            // 
+            this.NumericUpDown_AutoRunLowerSpeed.Location = new System.Drawing.Point(266, 48);
+            this.NumericUpDown_AutoRunLowerSpeed.Name = "NumericUpDown_AutoRunLowerSpeed";
+            this.NumericUpDown_AutoRunLowerSpeed.Size = new System.Drawing.Size(60, 19);
+            this.NumericUpDown_AutoRunLowerSpeed.TabIndex = 21;
+            this.NumericUpDown_AutoRunLowerSpeed.Maximum = new decimal(new int[] {
+            300,
+            0,
+            0,
+            0});
+            this.NumericUpDown_AutoRunLowerSpeed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.NumericUpDown_AutoRunLowerSpeed.Value = new decimal(new int[] {
+            80,
+            0,
+            0,
+            0});
+            // 
+            // Label_AutoRunLowerSpeed_Unit
+            // 
+            this.Label_AutoRunLowerSpeed_Unit.AutoSize = true;
+            this.Label_AutoRunLowerSpeed_Unit.Location = new System.Drawing.Point(331, 51);
+            this.Label_AutoRunLowerSpeed_Unit.Name = "Label_AutoRunLowerSpeed_Unit";
+            this.Label_AutoRunLowerSpeed_Unit.Size = new System.Drawing.Size(40, 12);
+            this.Label_AutoRunLowerSpeed_Unit.TabIndex = 22;
+            this.Label_AutoRunLowerSpeed_Unit.Text = "km/h";
+            // 
+            // RadioButton_AutoRunDuration
+            // 
+            this.RadioButton_AutoRunDuration.AutoSize = true;
+            this.RadioButton_AutoRunDuration.Checked = true;
+            this.RadioButton_AutoRunDuration.Location = new System.Drawing.Point(8, 76);
+            this.RadioButton_AutoRunDuration.Name = "RadioButton_AutoRunDuration";
+            this.RadioButton_AutoRunDuration.Size = new System.Drawing.Size(71, 16);
+            this.RadioButton_AutoRunDuration.TabIndex = 23;
+            this.RadioButton_AutoRunDuration.TabStop = true;
+            this.RadioButton_AutoRunDuration.Text = "走行時間";
+            this.RadioButton_AutoRunDuration.UseVisualStyleBackColor = true;
+            this.RadioButton_AutoRunDuration.CheckedChanged += new System.EventHandler(this.RadioButton_AutoRun_CheckedChanged);
+            // 
+            // NumericUpDown_AutoRunMinutes
+            // 
+            this.NumericUpDown_AutoRunMinutes.Location = new System.Drawing.Point(88, 75);
+            this.NumericUpDown_AutoRunMinutes.Name = "NumericUpDown_AutoRunMinutes";
+            this.NumericUpDown_AutoRunMinutes.Size = new System.Drawing.Size(52, 19);
+            this.NumericUpDown_AutoRunMinutes.TabIndex = 24;
+            this.NumericUpDown_AutoRunMinutes.Maximum = new decimal(new int[] {
+            999,
+            0,
+            0,
+            0});
+            this.NumericUpDown_AutoRunMinutes.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.NumericUpDown_AutoRunMinutes.Value = new decimal(new int[] {
+            15,
+            0,
+            0,
+            0});
+            // 
+            // Label_AutoRunMinutes_Unit
+            // 
+            this.Label_AutoRunMinutes_Unit.AutoSize = true;
+            this.Label_AutoRunMinutes_Unit.Location = new System.Drawing.Point(143, 78);
+            this.Label_AutoRunMinutes_Unit.Name = "Label_AutoRunMinutes_Unit";
+            this.Label_AutoRunMinutes_Unit.Size = new System.Drawing.Size(40, 12);
+            this.Label_AutoRunMinutes_Unit.TabIndex = 25;
+            this.Label_AutoRunMinutes_Unit.Text = "分";
+            // 
+            // NumericUpDown_AutoRunSeconds
+            // 
+            this.NumericUpDown_AutoRunSeconds.Location = new System.Drawing.Point(166, 75);
+            this.NumericUpDown_AutoRunSeconds.Name = "NumericUpDown_AutoRunSeconds";
+            this.NumericUpDown_AutoRunSeconds.Size = new System.Drawing.Size(42, 19);
+            this.NumericUpDown_AutoRunSeconds.TabIndex = 26;
+            this.NumericUpDown_AutoRunSeconds.Maximum = new decimal(new int[] {
+            59,
+            0,
+            0,
+            0});
+            this.NumericUpDown_AutoRunSeconds.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // Label_AutoRunSeconds_Unit
+            // 
+            this.Label_AutoRunSeconds_Unit.AutoSize = true;
+            this.Label_AutoRunSeconds_Unit.Location = new System.Drawing.Point(211, 78);
+            this.Label_AutoRunSeconds_Unit.Name = "Label_AutoRunSeconds_Unit";
+            this.Label_AutoRunSeconds_Unit.Size = new System.Drawing.Size(40, 12);
+            this.Label_AutoRunSeconds_Unit.TabIndex = 27;
+            this.Label_AutoRunSeconds_Unit.Text = "秒";
+            // 
+            // RadioButton_AutoRunEndTime
+            // 
+            this.RadioButton_AutoRunEndTime.AutoSize = true;
+            this.RadioButton_AutoRunEndTime.Location = new System.Drawing.Point(8, 100);
+            this.RadioButton_AutoRunEndTime.Name = "RadioButton_AutoRunEndTime";
+            this.RadioButton_AutoRunEndTime.Size = new System.Drawing.Size(71, 16);
+            this.RadioButton_AutoRunEndTime.TabIndex = 28;
+            this.RadioButton_AutoRunEndTime.Text = "終了日時";
+            this.RadioButton_AutoRunEndTime.UseVisualStyleBackColor = true;
+            this.RadioButton_AutoRunEndTime.CheckedChanged += new System.EventHandler(this.RadioButton_AutoRun_CheckedChanged);
+            // 
+            // DateTimePicker_AutoRunEndTime
+            // 
+            this.DateTimePicker_AutoRunEndTime.CustomFormat = "yyyy/MM/dd HH:mm:ss";
+            this.DateTimePicker_AutoRunEndTime.Enabled = false;
+            this.DateTimePicker_AutoRunEndTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.DateTimePicker_AutoRunEndTime.Location = new System.Drawing.Point(88, 98);
+            this.DateTimePicker_AutoRunEndTime.Name = "DateTimePicker_AutoRunEndTime";
+            this.DateTimePicker_AutoRunEndTime.Size = new System.Drawing.Size(150, 19);
+            this.DateTimePicker_AutoRunEndTime.TabIndex = 29;
+            // 
+            // RadioButton_AutoRunNoLimit
+            // 
+            this.RadioButton_AutoRunNoLimit.AutoSize = true;
+            this.RadioButton_AutoRunNoLimit.Location = new System.Drawing.Point(8, 124);
+            this.RadioButton_AutoRunNoLimit.Name = "RadioButton_AutoRunNoLimit";
+            this.RadioButton_AutoRunNoLimit.Size = new System.Drawing.Size(71, 16);
+            this.RadioButton_AutoRunNoLimit.TabIndex = 30;
+            this.RadioButton_AutoRunNoLimit.Text = "指定なし";
+            this.RadioButton_AutoRunNoLimit.UseVisualStyleBackColor = true;
+            this.RadioButton_AutoRunNoLimit.CheckedChanged += new System.EventHandler(this.RadioButton_AutoRun_CheckedChanged);
+            // 
+            // Label_AutoRunRemaining
+            // 
+            this.Label_AutoRunRemaining.AutoSize = true;
+            this.Label_AutoRunRemaining.Location = new System.Drawing.Point(88, 126);
+            this.Label_AutoRunRemaining.Name = "Label_AutoRunRemaining";
+            this.Label_AutoRunRemaining.Size = new System.Drawing.Size(95, 12);
+            this.Label_AutoRunRemaining.TabIndex = 31;
+            this.Label_AutoRunRemaining.Text = "残り時間：--:--";
+            // 
+            // Button_AutoRun
+            // 
+            this.Button_AutoRun.Location = new System.Drawing.Point(290, 96);
+            this.Button_AutoRun.Name = "Button_AutoRun";
+            this.Button_AutoRun.Size = new System.Drawing.Size(110, 44);
+            this.Button_AutoRun.TabIndex = 32;
+            this.Button_AutoRun.Text = "開始";
+            this.Button_AutoRun.UseVisualStyleBackColor = true;
+            this.Button_AutoRun.Click += new System.EventHandler(this.Button_AutoRun_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(434, 281);
+            this.ClientSize = new System.Drawing.Size(434, 443);
+            this.Controls.Add(this.GroupBox_AutoRun);
             this.Controls.Add(this.CheckBox_EB);
             this.Controls.Add(this.CheckBox_NotchUnLinked);
             this.Controls.Add(this.GroupBox_Infomation);
@@ -280,6 +626,14 @@
             this.GroupBox_MotorSound.ResumeLayout(false);
             this.GroupBox_RunSound.ResumeLayout(false);
             this.GroupBox_Infomation.ResumeLayout(false);
+            this.GroupBox_AutoRun.ResumeLayout(false);
+            this.GroupBox_AutoRun.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunAcceleration)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunDeceleration)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunMaxSpeed)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunLowerSpeed)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunMinutes)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunSeconds)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -304,6 +658,29 @@
         private System.Windows.Forms.Label Label_RegenerationLimit_Unit;
         private System.Windows.Forms.ComboBox ComboBox_RegenerationLimit;
         private System.Windows.Forms.CheckBox CheckBox_EB;
+        private System.Windows.Forms.GroupBox GroupBox_AutoRun;
+        private System.Windows.Forms.Label Label_AutoRunAcceleration;
+        private System.Windows.Forms.NumericUpDown NumericUpDown_AutoRunAcceleration;
+        private System.Windows.Forms.Label Label_AutoRunAcceleration_Unit;
+        private System.Windows.Forms.Label Label_AutoRunDeceleration;
+        private System.Windows.Forms.NumericUpDown NumericUpDown_AutoRunDeceleration;
+        private System.Windows.Forms.Label Label_AutoRunDeceleration_Unit;
+        private System.Windows.Forms.Label Label_AutoRunMaxSpeed;
+        private System.Windows.Forms.NumericUpDown NumericUpDown_AutoRunMaxSpeed;
+        private System.Windows.Forms.Label Label_AutoRunMaxSpeed_Unit;
+        private System.Windows.Forms.Label Label_AutoRunLowerSpeed;
+        private System.Windows.Forms.NumericUpDown NumericUpDown_AutoRunLowerSpeed;
+        private System.Windows.Forms.Label Label_AutoRunLowerSpeed_Unit;
+        private System.Windows.Forms.RadioButton RadioButton_AutoRunDuration;
+        private System.Windows.Forms.NumericUpDown NumericUpDown_AutoRunMinutes;
+        private System.Windows.Forms.Label Label_AutoRunMinutes_Unit;
+        private System.Windows.Forms.NumericUpDown NumericUpDown_AutoRunSeconds;
+        private System.Windows.Forms.Label Label_AutoRunSeconds_Unit;
+        private System.Windows.Forms.RadioButton RadioButton_AutoRunEndTime;
+        private System.Windows.Forms.DateTimePicker DateTimePicker_AutoRunEndTime;
+        private System.Windows.Forms.RadioButton RadioButton_AutoRunNoLimit;
+        private System.Windows.Forms.Label Label_AutoRunRemaining;
+        private System.Windows.Forms.Button Button_AutoRun;
     }
 }
 
