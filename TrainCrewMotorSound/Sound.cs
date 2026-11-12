@@ -1,5 +1,6 @@
 ﻿using SharpDX.XAudio2;
 using SharpDX.Multimedia;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -11,6 +12,10 @@ namespace TrainCrewMotorSound
     /// </summary>
     public class Sound
     {
+        // ピッチ(再生速度の倍率)の上限・下限
+        private const float MaxFrequencyRatio = 8.0f;
+        private const float MinFrequencyRatio = 1.0f / 1024.0f;
+
         private XAudio2 xAudio2;
         private MasteringVoice masteringVoice;
         public List<SourceVoice> motorSoundSource = new List<SourceVoice>();
@@ -56,102 +61,84 @@ namespace TrainCrewMotorSound
             ClearSoundData();
 
             // Motorサウンド読み込み
-            foreach (var entry in motorSoundData)
-            {
-                int index = entry.Key;
-                string filePath = entry.Value;
-
-                if (!File.Exists(filePath))
-                {
-                    MessageBox.Show($"Motorサウンドファイルが見つかりません: {filePath}", "エラー");
-                    continue;
-                }
-
-                // サウンドファイルを読み込む
-                using (var stream = new SoundStream(File.OpenRead(filePath)))
-                {
-                    var waveFormat = stream.Format;
-                    var buffer = new AudioBuffer
-                    {
-                        Stream = stream.ToDataStream(),
-                        AudioBytes = (int)stream.Length,
-                        LoopCount = 255,
-                        LoopBegin = 0,
-                        LoopLength = 0,
-                        PlayBegin = 0,
-                        PlayLength = 0,
-                        Flags = BufferFlags.EndOfStream
-                    };
-
-                    // SourceVoiceを作成
-                    var sourceVoice = new SourceVoice(xAudio2, waveFormat, VoiceFlags.None, maxFrequencyRatio: 4.0f);
-
-                    // リストのサイズをsoundFileDataのキーに合わせる
-                    while (motorSoundSource.Count <= index)
-                    {
-                        motorSoundSource.Add(null);
-                    }
-                    while (motorSoundBuffer.Count <= index)
-                    {
-                        motorSoundBuffer.Add(null);
-                    }
-
-                    // 指定されたインデックスにSourceVoiceとAudioBufferを代入
-                    motorSoundSource[index] = sourceVoice;
-                    motorSoundBuffer[index] = buffer;
-                }
-            }
+            LoadSoundGroup(motorSoundData, motorSoundSource, motorSoundBuffer, "Motor");
             // サウンド読み込み判定
             IsMotorSoundFileLoaded = (motorSoundSource.Count > 0);
 
             // Runサウンド読み込み
-            foreach (var entry in runSoundData)
+            LoadSoundGroup(runSoundData, runSoundSource, runSoundBuffer, "Run");
+            // サウンド読み込み判定
+            IsRunSoundFileLoaded = (runSoundSource.Count > 0);
+        }
+
+        /// <summary>
+        /// 音声ファイル群を読み込み、番号に対応する位置へ格納するメソッド
+        /// </summary>
+        /// <param name="soundData">番号と音声ファイルパスの対応</param>
+        /// <param name="sources">格納先のSourceVoiceリスト</param>
+        /// <param name="buffers">格納先のAudioBufferリスト</param>
+        /// <param name="typeName">エラー表示用の音声種類名</param>
+        private void LoadSoundGroup(Dictionary<int, string> soundData, List<SourceVoice> sources, List<AudioBuffer> buffers, string typeName)
+        {
+            foreach (var entry in soundData)
             {
                 int index = entry.Key;
                 string filePath = entry.Value;
 
+                if (index < 0) continue;
+
                 if (!File.Exists(filePath))
                 {
-                    MessageBox.Show($"Runサウンドファイルが見つかりません:\n {filePath}", "エラー");
+                    MessageBox.Show($"{typeName}サウンドファイルが見つかりません:\n {filePath}", "エラー");
                     continue;
                 }
 
-                // サウンドファイルを読み込む
-                using (var stream = new SoundStream(File.OpenRead(filePath)))
+                AudioBuffer buffer = null;
+                SourceVoice sourceVoice = null;
+                try
                 {
-                    var waveFormat = stream.Format;
-                    var buffer = new AudioBuffer
+                    // サウンドファイルを読み込む
+                    using (var stream = new SoundStream(File.OpenRead(filePath)))
                     {
-                        Stream = stream.ToDataStream(),
-                        AudioBytes = (int)stream.Length,
-                        LoopCount = 255,
-                        LoopBegin = 0,
-                        LoopLength = 0,
-                        PlayBegin = 0,
-                        PlayLength = 0,
-                        Flags = BufferFlags.EndOfStream
-                    };
+                        var waveFormat = stream.Format;
+                        buffer = new AudioBuffer
+                        {
+                            Stream = stream.ToDataStream(),
+                            AudioBytes = (int)stream.Length,
+                            LoopCount = 255,
+                            LoopBegin = 0,
+                            LoopLength = 0,
+                            PlayBegin = 0,
+                            PlayLength = 0,
+                            Flags = BufferFlags.EndOfStream
+                        };
 
-                    // SourceVoiceを作成
-                    var sourceVoice = new SourceVoice(xAudio2, waveFormat, VoiceFlags.None, maxFrequencyRatio: 4.0f);
-
-                    // リストのサイズをsoundFileDataのキーに合わせる
-                    while (runSoundSource.Count <= index)
-                    {
-                        runSoundSource.Add(null);
+                        // SourceVoiceを作成
+                        sourceVoice = new SourceVoice(xAudio2, waveFormat, VoiceFlags.None, maxFrequencyRatio: MaxFrequencyRatio);
                     }
-                    while (runSoundBuffer.Count <= index)
-                    {
-                        runSoundBuffer.Add(null);
-                    }
-
-                    // 指定されたインデックスにSourceVoiceとAudioBufferを代入
-                    runSoundSource[index] = sourceVoice;
-                    runSoundBuffer[index] = buffer;
                 }
+                catch (Exception ex)
+                {
+                    // 読み込めない音声ファイルはスキップして続行する
+                    buffer?.Stream?.Dispose();
+                    MessageBox.Show($"{typeName}サウンドファイルを読み込めませんでした:\n {filePath}\n\n{ex.Message}", "エラー");
+                    continue;
+                }
+
+                // リストのサイズをsoundFileDataのキーに合わせる
+                while (sources.Count <= index)
+                {
+                    sources.Add(null);
+                }
+                while (buffers.Count <= index)
+                {
+                    buffers.Add(null);
+                }
+
+                // 指定されたインデックスにSourceVoiceとAudioBufferを代入
+                sources[index] = sourceVoice;
+                buffers[index] = buffer;
             }
-            // サウンド読み込み判定
-            IsRunSoundFileLoaded = (runSoundSource.Count > 0);
         }
 
         /// <summary>
@@ -176,6 +163,17 @@ namespace TrainCrewMotorSound
                     voice.DestroyVoice();
                 }
             }
+
+            // 音声データのメモリを解放 (SourceVoiceの解放後に行う)
+            foreach (var buffer in motorSoundBuffer)
+            {
+                buffer?.Stream?.Dispose();
+            }
+            foreach (var buffer in runSoundBuffer)
+            {
+                buffer?.Stream?.Dispose();
+            }
+
             motorSoundSource.Clear();
             motorSoundBuffer.Clear();
             runSoundSource.Clear();
@@ -203,7 +201,7 @@ namespace TrainCrewMotorSound
             // Runサウンドを再生
             if (runSoundSource.Count > 0)
             {
-                if (runSoundSource[runIndex] != null)
+                if (runIndex >= 0 && runIndex < runSoundSource.Count && runSoundSource[runIndex] != null)
                 {
                     // バッファをソースに渡して再生開始
                     runSoundSource[runIndex].SubmitSourceBuffer(runSoundBuffer[runIndex], null);
@@ -300,13 +298,13 @@ namespace TrainCrewMotorSound
             if (type.ToUpper() == "MOTOR")
             {
                 if (index < 0 || index >= motorSoundSource.Count || motorSoundSource[index] == null) return;
-                if (volume < 0) volume = 0;
+                if (float.IsNaN(volume) || volume < 0) volume = 0;
                 motorSoundSource[index].SetVolume(fMotorMasterVolume * fFadeVolume * volume);
             }
             else if (type.ToUpper() == "RUN")
             {
                 if (index < 0 || index >= runSoundSource.Count || runSoundSource[index] == null) return;
-                if (volume < 0) volume = 0;
+                if (float.IsNaN(volume) || volume < 0) volume = 0;
                 runSoundSource[index].SetVolume(fRunMasterVolume * volume);
             }
         }
@@ -321,13 +319,25 @@ namespace TrainCrewMotorSound
             if (type.ToUpper() == "MOTOR")
             {
                 if (index < 0 || index >= motorSoundSource.Count || motorSoundSource[index] == null) return;
-                motorSoundSource[index].SetFrequencyRatio(pitch);
+                motorSoundSource[index].SetFrequencyRatio(ClampPitch(pitch));
             }
             else if (type.ToUpper() == "RUN")
             {
                 if (index < 0 || index >= runSoundSource.Count || runSoundSource[index] == null) return;
-                runSoundSource[index].SetFrequencyRatio(pitch);
+                runSoundSource[index].SetFrequencyRatio(ClampPitch(pitch));
             }
+        }
+
+        /// <summary>
+        /// ピッチを設定可能な範囲に収めるメソッド
+        /// </summary>
+        /// <param name="pitch"></param>
+        /// <returns></returns>
+        private static float ClampPitch(float pitch)
+        {
+            if (float.IsNaN(pitch) || pitch < MinFrequencyRatio) return MinFrequencyRatio;
+            if (pitch > MaxFrequencyRatio) return MaxFrequencyRatio;
+            return pitch;
         }
 
         /// <summary>

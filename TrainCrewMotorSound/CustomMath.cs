@@ -16,6 +16,8 @@
         /// <returns></returns>
         public static float Lerp(float x0, float y0, float x1, float y1, float x)
         {
+            // 2点のxが同じ場合は補間できないためy0を返す (0除算防止)
+            if (x1 == x0) return y0;
             return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
         }
     }
