@@ -240,6 +240,7 @@ namespace TrainCrewMotorSound
                         case AutoRunPhase.BrakeReleasing: judgeText = "緩解"; break;
                         case AutoRunPhase.Accelerating: judgeText = "加速"; break;
                         case AutoRunPhase.Braking: judgeText = "減速"; break;
+                        case AutoRunPhase.DoorOpenWaiting: judgeText = "停車"; break;
                         case AutoRunPhase.DoorOpening: judgeText = "ドア開"; break;
                         default: judgeText = "惰行"; break;
                     }
@@ -516,6 +517,7 @@ namespace TrainCrewMotorSound
                 LowerSpeed = lowerSpeed,
                 DoorCloseSeconds = (double)NumericUpDown_EffectDoorClose.Value,
                 BrakeReleaseSeconds = (double)NumericUpDown_EffectBrakeRelease.Value,
+                DoorOpenWaitSeconds = (double)NumericUpDown_EffectDoorOpenWait.Value,
                 DoorOpenSeconds = (double)NumericUpDown_EffectDoorOpen.Value
             };
 
@@ -565,9 +567,11 @@ namespace TrainCrewMotorSound
                     case AutoRunPhase.BrakeReleasing:
                         sound.PlayEffectSound(1);
                         break;
+                    case AutoRunPhase.DoorOpenWaiting:
+                        Button_AutoRun.Text = "停止";
+                        break;
                     case AutoRunPhase.DoorOpening:
                         sound.PlayEffectSound(2);
-                        Button_AutoRun.Text = "停止";
                         break;
                 }
             }
@@ -694,6 +698,7 @@ namespace TrainCrewMotorSound
             }
             NumericUpDown_EffectDoorClose.Enabled = !isRunning;
             NumericUpDown_EffectBrakeRelease.Enabled = !isRunning;
+            NumericUpDown_EffectDoorOpenWait.Enabled = !isRunning;
             NumericUpDown_EffectDoorOpen.Enabled = !isRunning;
 
             // 選択中の終了条件の入力欄のみ有効にする

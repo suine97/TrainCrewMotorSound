@@ -19,6 +19,8 @@ namespace TrainCrewMotorSound
         Coasting,
         /// <summary>減速</summary>
         Braking,
+        /// <summary>ドア開待機 (停車してからドア開までの待機)</summary>
+        DoorOpenWaiting,
         /// <summary>ドア開 (停車後の待機)</summary>
         DoorOpening
     }
@@ -40,6 +42,8 @@ namespace TrainCrewMotorSound
         public double DoorCloseSeconds = 0.0;
         /// <summary>ブレーキ緩解の待機時間 [s]</summary>
         public double BrakeReleaseSeconds = 0.0;
+        /// <summary>停車してからドア開までの待機時間 [s]</summary>
+        public double DoorOpenWaitSeconds = 0.0;
         /// <summary>ドア開の待機時間 [s]</summary>
         public double DoorOpenSeconds = 0.0;
         /// <summary>走行時間 [s] (加速開始から0km/hまでの時間。待機時間は含まない。指定しない場合はnull)</summary>
@@ -50,7 +54,7 @@ namespace TrainCrewMotorSound
 
     /// <summary>
     /// 自動走行モードの進行管理・速度計算クラス
-    /// (ドア閉 → ブレーキ緩解 → 加速・惰行・減速 → ドア開 の順に進める。
+    /// (ドア閉 → ブレーキ緩解 → 加速・惰行・減速 → ドア開待機 → ドア開 の順に進める。
     ///  走行中は 加速 → 最高速度で惰行 → 下限速度を下回ると再加速 を繰り返し、終了時刻にちょうど0km/hとなるように減速する)
     /// </summary>
     public class AutoRun
@@ -124,7 +128,7 @@ namespace TrainCrewMotorSound
 
         /// <summary>
         /// 停止要求
-        /// (走行中は、加速中なら惰行を挟み、指定の減速度で0km/hまで減速してからドア開へ進む。待機中は即時に打ち切る)
+        /// (走行中は、加速中なら惰行を挟み、指定の減速度で0km/hまで減速してからドア開待機へ進む。待機中は即時に打ち切る)
         /// </summary>
         public void RequestStop()
         {
@@ -155,7 +159,7 @@ namespace TrainCrewMotorSound
             if (!IsRunning) return null;
 
             double seconds;
-            if (Phase == AutoRunPhase.DoorOpening)
+            if (Phase == AutoRunPhase.DoorOpenWaiting || Phase == AutoRunPhase.DoorOpening)
             {
                 if (!settings.RunSeconds.HasValue && !settings.EndTime.HasValue) return null;
                 seconds = 0.0;
@@ -239,6 +243,7 @@ namespace TrainCrewMotorSound
             {
                 case AutoRunPhase.DoorClosing: return Math.Max(0.0, settings.DoorCloseSeconds);
                 case AutoRunPhase.BrakeReleasing: return Math.Max(0.0, settings.BrakeReleaseSeconds);
+                case AutoRunPhase.DoorOpenWaiting: return Math.Max(0.0, settings.DoorOpenWaitSeconds);
                 case AutoRunPhase.DoorOpening: return Math.Max(0.0, settings.DoorOpenSeconds);
                 default: return 0.0;
             }
@@ -266,6 +271,10 @@ namespace TrainCrewMotorSound
                     EnterPhase(AutoRunPhase.Accelerating);
                     break;
 
+                case AutoRunPhase.DoorOpenWaiting:
+                    EnterPhase(AutoRunPhase.DoorOpening);
+                    break;
+
                 default:
                     Abort();
                     break;
@@ -273,13 +282,13 @@ namespace TrainCrewMotorSound
         }
 
         /// <summary>
-        /// 走行(加速・惰行・減速)を終えてドア開へ進む
+        /// 走行(加速・惰行・減速)を終えてドア開待機へ進む
         /// </summary>
         private void FinishDriving()
         {
             Speed = 0.0;
             IsStopRequested = false;
-            EnterPhase(AutoRunPhase.DoorOpening);
+            EnterPhase(AutoRunPhase.DoorOpenWaiting);
         }
 
         /// <summary>

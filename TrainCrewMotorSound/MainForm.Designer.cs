@@ -70,6 +70,9 @@
             this.TrackBar_EffectBrakeRelease = new System.Windows.Forms.TrackBar();
             this.NumericUpDown_EffectBrakeRelease = new System.Windows.Forms.NumericUpDown();
             this.Label_EffectBrakeRelease_Unit = new System.Windows.Forms.Label();
+            this.Label_EffectDoorOpenWait = new System.Windows.Forms.Label();
+            this.NumericUpDown_EffectDoorOpenWait = new System.Windows.Forms.NumericUpDown();
+            this.Label_EffectDoorOpenWait_Unit = new System.Windows.Forms.Label();
             this.Label_EffectDoorOpen = new System.Windows.Forms.Label();
             this.Button_EffectDoorOpen = new System.Windows.Forms.Button();
             this.Button_EffectDoorOpenClear = new System.Windows.Forms.Button();
@@ -100,6 +103,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_EffectDoorClose)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_EffectBrakeRelease)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_EffectBrakeRelease)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_EffectDoorOpenWait)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_EffectDoorOpen)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_EffectDoorOpen)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunMinutes)).BeginInit();
@@ -338,6 +342,9 @@
             this.GroupBox_AutoRun.Controls.Add(this.TrackBar_EffectBrakeRelease);
             this.GroupBox_AutoRun.Controls.Add(this.NumericUpDown_EffectBrakeRelease);
             this.GroupBox_AutoRun.Controls.Add(this.Label_EffectBrakeRelease_Unit);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_EffectDoorOpenWait);
+            this.GroupBox_AutoRun.Controls.Add(this.NumericUpDown_EffectDoorOpenWait);
+            this.GroupBox_AutoRun.Controls.Add(this.Label_EffectDoorOpenWait_Unit);
             this.GroupBox_AutoRun.Controls.Add(this.Label_EffectDoorOpen);
             this.GroupBox_AutoRun.Controls.Add(this.Button_EffectDoorOpen);
             this.GroupBox_AutoRun.Controls.Add(this.Button_EffectDoorOpenClear);
@@ -357,7 +364,7 @@
             this.GroupBox_AutoRun.ForeColor = System.Drawing.Color.Blue;
             this.GroupBox_AutoRun.Location = new System.Drawing.Point(12, 281);
             this.GroupBox_AutoRun.Name = "GroupBox_AutoRun";
-            this.GroupBox_AutoRun.Size = new System.Drawing.Size(410, 234);
+            this.GroupBox_AutoRun.Size = new System.Drawing.Size(410, 262);
             this.GroupBox_AutoRun.TabIndex = 10;
             this.GroupBox_AutoRun.TabStop = false;
             this.GroupBox_AutoRun.Text = "自動走行モード";
@@ -709,11 +716,55 @@
             this.Label_EffectBrakeRelease_Unit.TabIndex = 52;
             this.Label_EffectBrakeRelease_Unit.Text = "秒";
             // 
+            // Label_EffectDoorOpenWait
+            // 
+            this.Label_EffectDoorOpenWait.AutoSize = true;
+            this.Label_EffectDoorOpenWait.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.Label_EffectDoorOpenWait.Location = new System.Drawing.Point(8, 137);
+            this.Label_EffectDoorOpenWait.Name = "Label_EffectDoorOpenWait";
+            this.Label_EffectDoorOpenWait.Size = new System.Drawing.Size(113, 12);
+            this.Label_EffectDoorOpenWait.TabIndex = 60;
+            this.Label_EffectDoorOpenWait.Text = "ドア開までの待機時間";
+            // 
+            // NumericUpDown_EffectDoorOpenWait
+            // 
+            this.NumericUpDown_EffectDoorOpenWait.DecimalPlaces = 1;
+            this.NumericUpDown_EffectDoorOpenWait.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.NumericUpDown_EffectDoorOpenWait.Location = new System.Drawing.Point(334, 134);
+            this.NumericUpDown_EffectDoorOpenWait.Maximum = new decimal(new int[] {
+            600,
+            0,
+            0,
+            65536});
+            this.NumericUpDown_EffectDoorOpenWait.Name = "NumericUpDown_EffectDoorOpenWait";
+            this.NumericUpDown_EffectDoorOpenWait.Size = new System.Drawing.Size(50, 19);
+            this.NumericUpDown_EffectDoorOpenWait.TabIndex = 61;
+            this.NumericUpDown_EffectDoorOpenWait.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.NumericUpDown_EffectDoorOpenWait.Value = new decimal(new int[] {
+            20,
+            0,
+            0,
+            65536});
+            // 
+            // Label_EffectDoorOpenWait_Unit
+            // 
+            this.Label_EffectDoorOpenWait_Unit.AutoSize = true;
+            this.Label_EffectDoorOpenWait_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.Label_EffectDoorOpenWait_Unit.Location = new System.Drawing.Point(387, 137);
+            this.Label_EffectDoorOpenWait_Unit.Name = "Label_EffectDoorOpenWait_Unit";
+            this.Label_EffectDoorOpenWait_Unit.Size = new System.Drawing.Size(17, 12);
+            this.Label_EffectDoorOpenWait_Unit.TabIndex = 62;
+            this.Label_EffectDoorOpenWait_Unit.Text = "秒";
+            // 
             // Label_EffectDoorOpen
             // 
             this.Label_EffectDoorOpen.AutoSize = true;
             this.Label_EffectDoorOpen.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.Label_EffectDoorOpen.Location = new System.Drawing.Point(8, 137);
+            this.Label_EffectDoorOpen.Location = new System.Drawing.Point(8, 165);
             this.Label_EffectDoorOpen.Name = "Label_EffectDoorOpen";
             this.Label_EffectDoorOpen.Size = new System.Drawing.Size(40, 12);
             this.Label_EffectDoorOpen.TabIndex = 53;
@@ -723,7 +774,7 @@
             // 
             this.Button_EffectDoorOpen.AutoEllipsis = true;
             this.Button_EffectDoorOpen.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.Button_EffectDoorOpen.Location = new System.Drawing.Point(82, 132);
+            this.Button_EffectDoorOpen.Location = new System.Drawing.Point(82, 160);
             this.Button_EffectDoorOpen.Name = "Button_EffectDoorOpen";
             this.Button_EffectDoorOpen.Size = new System.Drawing.Size(116, 23);
             this.Button_EffectDoorOpen.TabIndex = 54;
@@ -736,7 +787,7 @@
             // 
             this.Button_EffectDoorOpenClear.Enabled = false;
             this.Button_EffectDoorOpenClear.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.Button_EffectDoorOpenClear.Location = new System.Drawing.Point(200, 132);
+            this.Button_EffectDoorOpenClear.Location = new System.Drawing.Point(200, 160);
             this.Button_EffectDoorOpenClear.Name = "Button_EffectDoorOpenClear";
             this.Button_EffectDoorOpenClear.Size = new System.Drawing.Size(22, 23);
             this.Button_EffectDoorOpenClear.TabIndex = 55;
@@ -748,7 +799,7 @@
             // TrackBar_EffectDoorOpen
             // 
             this.TrackBar_EffectDoorOpen.AutoSize = false;
-            this.TrackBar_EffectDoorOpen.Location = new System.Drawing.Point(226, 132);
+            this.TrackBar_EffectDoorOpen.Location = new System.Drawing.Point(226, 160);
             this.TrackBar_EffectDoorOpen.Name = "TrackBar_EffectDoorOpen";
             this.TrackBar_EffectDoorOpen.Size = new System.Drawing.Size(104, 24);
             this.TrackBar_EffectDoorOpen.TabIndex = 56;
@@ -767,7 +818,7 @@
             0,
             0,
             65536});
-            this.NumericUpDown_EffectDoorOpen.Location = new System.Drawing.Point(334, 134);
+            this.NumericUpDown_EffectDoorOpen.Location = new System.Drawing.Point(334, 162);
             this.NumericUpDown_EffectDoorOpen.Name = "NumericUpDown_EffectDoorOpen";
             this.NumericUpDown_EffectDoorOpen.Size = new System.Drawing.Size(50, 19);
             this.NumericUpDown_EffectDoorOpen.TabIndex = 57;
@@ -787,7 +838,7 @@
             // 
             this.Label_EffectDoorOpen_Unit.AutoSize = true;
             this.Label_EffectDoorOpen_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.Label_EffectDoorOpen_Unit.Location = new System.Drawing.Point(387, 137);
+            this.Label_EffectDoorOpen_Unit.Location = new System.Drawing.Point(387, 165);
             this.Label_EffectDoorOpen_Unit.Name = "Label_EffectDoorOpen_Unit";
             this.Label_EffectDoorOpen_Unit.Size = new System.Drawing.Size(17, 12);
             this.Label_EffectDoorOpen_Unit.TabIndex = 58;
@@ -798,7 +849,7 @@
             this.RadioButton_AutoRunDuration.AutoSize = true;
             this.RadioButton_AutoRunDuration.Checked = true;
             this.RadioButton_AutoRunDuration.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.RadioButton_AutoRunDuration.Location = new System.Drawing.Point(8, 160);
+            this.RadioButton_AutoRunDuration.Location = new System.Drawing.Point(8, 188);
             this.RadioButton_AutoRunDuration.Name = "RadioButton_AutoRunDuration";
             this.RadioButton_AutoRunDuration.Size = new System.Drawing.Size(71, 16);
             this.RadioButton_AutoRunDuration.TabIndex = 23;
@@ -809,7 +860,7 @@
             // 
             // NumericUpDown_AutoRunMinutes
             // 
-            this.NumericUpDown_AutoRunMinutes.Location = new System.Drawing.Point(88, 159);
+            this.NumericUpDown_AutoRunMinutes.Location = new System.Drawing.Point(88, 187);
             this.NumericUpDown_AutoRunMinutes.Name = "NumericUpDown_AutoRunMinutes";
             this.NumericUpDown_AutoRunMinutes.Size = new System.Drawing.Size(52, 19);
             this.NumericUpDown_AutoRunMinutes.TabIndex = 24;
@@ -829,7 +880,7 @@
             // 
             this.Label_AutoRunMinutes_Unit.AutoSize = true;
             this.Label_AutoRunMinutes_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.Label_AutoRunMinutes_Unit.Location = new System.Drawing.Point(143, 162);
+            this.Label_AutoRunMinutes_Unit.Location = new System.Drawing.Point(143, 190);
             this.Label_AutoRunMinutes_Unit.Name = "Label_AutoRunMinutes_Unit";
             this.Label_AutoRunMinutes_Unit.Size = new System.Drawing.Size(40, 12);
             this.Label_AutoRunMinutes_Unit.TabIndex = 25;
@@ -837,7 +888,7 @@
             // 
             // NumericUpDown_AutoRunSeconds
             // 
-            this.NumericUpDown_AutoRunSeconds.Location = new System.Drawing.Point(166, 159);
+            this.NumericUpDown_AutoRunSeconds.Location = new System.Drawing.Point(166, 187);
             this.NumericUpDown_AutoRunSeconds.Name = "NumericUpDown_AutoRunSeconds";
             this.NumericUpDown_AutoRunSeconds.Size = new System.Drawing.Size(42, 19);
             this.NumericUpDown_AutoRunSeconds.TabIndex = 26;
@@ -852,7 +903,7 @@
             // 
             this.Label_AutoRunSeconds_Unit.AutoSize = true;
             this.Label_AutoRunSeconds_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.Label_AutoRunSeconds_Unit.Location = new System.Drawing.Point(211, 162);
+            this.Label_AutoRunSeconds_Unit.Location = new System.Drawing.Point(211, 190);
             this.Label_AutoRunSeconds_Unit.Name = "Label_AutoRunSeconds_Unit";
             this.Label_AutoRunSeconds_Unit.Size = new System.Drawing.Size(40, 12);
             this.Label_AutoRunSeconds_Unit.TabIndex = 27;
@@ -862,7 +913,7 @@
             // 
             this.RadioButton_AutoRunEndTime.AutoSize = true;
             this.RadioButton_AutoRunEndTime.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.RadioButton_AutoRunEndTime.Location = new System.Drawing.Point(8, 184);
+            this.RadioButton_AutoRunEndTime.Location = new System.Drawing.Point(8, 212);
             this.RadioButton_AutoRunEndTime.Name = "RadioButton_AutoRunEndTime";
             this.RadioButton_AutoRunEndTime.Size = new System.Drawing.Size(71, 16);
             this.RadioButton_AutoRunEndTime.TabIndex = 28;
@@ -875,7 +926,7 @@
             this.DateTimePicker_AutoRunEndTime.CustomFormat = "yyyy/MM/dd HH:mm:ss";
             this.DateTimePicker_AutoRunEndTime.Enabled = false;
             this.DateTimePicker_AutoRunEndTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.DateTimePicker_AutoRunEndTime.Location = new System.Drawing.Point(88, 182);
+            this.DateTimePicker_AutoRunEndTime.Location = new System.Drawing.Point(88, 210);
             this.DateTimePicker_AutoRunEndTime.Name = "DateTimePicker_AutoRunEndTime";
             this.DateTimePicker_AutoRunEndTime.Size = new System.Drawing.Size(150, 19);
             this.DateTimePicker_AutoRunEndTime.TabIndex = 29;
@@ -884,7 +935,7 @@
             // 
             this.RadioButton_AutoRunNoLimit.AutoSize = true;
             this.RadioButton_AutoRunNoLimit.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.RadioButton_AutoRunNoLimit.Location = new System.Drawing.Point(8, 208);
+            this.RadioButton_AutoRunNoLimit.Location = new System.Drawing.Point(8, 236);
             this.RadioButton_AutoRunNoLimit.Name = "RadioButton_AutoRunNoLimit";
             this.RadioButton_AutoRunNoLimit.Size = new System.Drawing.Size(71, 16);
             this.RadioButton_AutoRunNoLimit.TabIndex = 30;
@@ -896,7 +947,7 @@
             // 
             this.Label_AutoRunRemaining.AutoSize = true;
             this.Label_AutoRunRemaining.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.Label_AutoRunRemaining.Location = new System.Drawing.Point(88, 210);
+            this.Label_AutoRunRemaining.Location = new System.Drawing.Point(88, 238);
             this.Label_AutoRunRemaining.Name = "Label_AutoRunRemaining";
             this.Label_AutoRunRemaining.Size = new System.Drawing.Size(95, 12);
             this.Label_AutoRunRemaining.TabIndex = 31;
@@ -905,7 +956,7 @@
             // Button_AutoRun
             // 
             this.Button_AutoRun.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.Button_AutoRun.Location = new System.Drawing.Point(290, 180);
+            this.Button_AutoRun.Location = new System.Drawing.Point(290, 208);
             this.Button_AutoRun.Name = "Button_AutoRun";
             this.Button_AutoRun.Size = new System.Drawing.Size(110, 44);
             this.Button_AutoRun.TabIndex = 32;
@@ -917,7 +968,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(434, 527);
+            this.ClientSize = new System.Drawing.Size(434, 555);
             this.Controls.Add(this.GroupBox_AutoRun);
             this.Controls.Add(this.CheckBox_EB);
             this.Controls.Add(this.CheckBox_NotchUnLinked);
@@ -946,6 +997,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_EffectDoorClose)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_EffectBrakeRelease)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_EffectBrakeRelease)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_EffectDoorOpenWait)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_EffectDoorOpen)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_EffectDoorOpen)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunMinutes)).EndInit();
@@ -999,6 +1051,9 @@
         private System.Windows.Forms.TrackBar TrackBar_EffectBrakeRelease;
         private System.Windows.Forms.NumericUpDown NumericUpDown_EffectBrakeRelease;
         private System.Windows.Forms.Label Label_EffectBrakeRelease_Unit;
+        private System.Windows.Forms.Label Label_EffectDoorOpenWait;
+        private System.Windows.Forms.NumericUpDown NumericUpDown_EffectDoorOpenWait;
+        private System.Windows.Forms.Label Label_EffectDoorOpenWait_Unit;
         private System.Windows.Forms.Label Label_EffectDoorOpen;
         private System.Windows.Forms.Button Button_EffectDoorOpen;
         private System.Windows.Forms.Button Button_EffectDoorOpenClear;
