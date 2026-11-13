@@ -312,6 +312,7 @@
             this.GroupBox_AutoRun.Controls.Add(this.RadioButton_AutoRunNoLimit);
             this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunRemaining);
             this.GroupBox_AutoRun.Controls.Add(this.Button_AutoRun);
+            this.GroupBox_AutoRun.ForeColor = System.Drawing.Color.Blue;
             this.GroupBox_AutoRun.Location = new System.Drawing.Point(12, 281);
             this.GroupBox_AutoRun.Name = "GroupBox_AutoRun";
             this.GroupBox_AutoRun.Size = new System.Drawing.Size(410, 150);
@@ -322,6 +323,7 @@
             // Label_AutoRunAcceleration
             // 
             this.Label_AutoRunAcceleration.AutoSize = true;
+            this.Label_AutoRunAcceleration.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Label_AutoRunAcceleration.Location = new System.Drawing.Point(8, 25);
             this.Label_AutoRunAcceleration.Name = "Label_AutoRunAcceleration";
             this.Label_AutoRunAcceleration.Size = new System.Drawing.Size(40, 12);
@@ -360,6 +362,7 @@
             // Label_AutoRunAcceleration_Unit
             // 
             this.Label_AutoRunAcceleration_Unit.AutoSize = true;
+            this.Label_AutoRunAcceleration_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Label_AutoRunAcceleration_Unit.Location = new System.Drawing.Point(133, 25);
             this.Label_AutoRunAcceleration_Unit.Name = "Label_AutoRunAcceleration_Unit";
             this.Label_AutoRunAcceleration_Unit.Size = new System.Drawing.Size(40, 12);
@@ -369,6 +372,7 @@
             // Label_AutoRunDeceleration
             // 
             this.Label_AutoRunDeceleration.AutoSize = true;
+            this.Label_AutoRunDeceleration.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Label_AutoRunDeceleration.Location = new System.Drawing.Point(206, 25);
             this.Label_AutoRunDeceleration.Name = "Label_AutoRunDeceleration";
             this.Label_AutoRunDeceleration.Size = new System.Drawing.Size(40, 12);
@@ -407,6 +411,7 @@
             // Label_AutoRunDeceleration_Unit
             // 
             this.Label_AutoRunDeceleration_Unit.AutoSize = true;
+            this.Label_AutoRunDeceleration_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Label_AutoRunDeceleration_Unit.Location = new System.Drawing.Point(331, 25);
             this.Label_AutoRunDeceleration_Unit.Name = "Label_AutoRunDeceleration_Unit";
             this.Label_AutoRunDeceleration_Unit.Size = new System.Drawing.Size(40, 12);
@@ -416,6 +421,7 @@
             // Label_AutoRunMaxSpeed
             // 
             this.Label_AutoRunMaxSpeed.AutoSize = true;
+            this.Label_AutoRunMaxSpeed.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Label_AutoRunMaxSpeed.Location = new System.Drawing.Point(8, 51);
             this.Label_AutoRunMaxSpeed.Name = "Label_AutoRunMaxSpeed";
             this.Label_AutoRunMaxSpeed.Size = new System.Drawing.Size(40, 12);
@@ -448,6 +454,7 @@
             // Label_AutoRunMaxSpeed_Unit
             // 
             this.Label_AutoRunMaxSpeed_Unit.AutoSize = true;
+            this.Label_AutoRunMaxSpeed_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Label_AutoRunMaxSpeed_Unit.Location = new System.Drawing.Point(133, 51);
             this.Label_AutoRunMaxSpeed_Unit.Name = "Label_AutoRunMaxSpeed_Unit";
             this.Label_AutoRunMaxSpeed_Unit.Size = new System.Drawing.Size(40, 12);
@@ -457,6 +464,7 @@
             // Label_AutoRunLowerSpeed
             // 
             this.Label_AutoRunLowerSpeed.AutoSize = true;
+            this.Label_AutoRunLowerSpeed.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Label_AutoRunLowerSpeed.Location = new System.Drawing.Point(206, 51);
             this.Label_AutoRunLowerSpeed.Name = "Label_AutoRunLowerSpeed";
             this.Label_AutoRunLowerSpeed.Size = new System.Drawing.Size(40, 12);
@@ -484,6 +492,7 @@
             // Label_AutoRunLowerSpeed_Unit
             // 
             this.Label_AutoRunLowerSpeed_Unit.AutoSize = true;
+            this.Label_AutoRunLowerSpeed_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Label_AutoRunLowerSpeed_Unit.Location = new System.Drawing.Point(331, 51);
             this.Label_AutoRunLowerSpeed_Unit.Name = "Label_AutoRunLowerSpeed_Unit";
             this.Label_AutoRunLowerSpeed_Unit.Size = new System.Drawing.Size(40, 12);
@@ -494,6 +503,7 @@
             // 
             this.RadioButton_AutoRunDuration.AutoSize = true;
             this.RadioButton_AutoRunDuration.Checked = true;
+            this.RadioButton_AutoRunDuration.ForeColor = System.Drawing.SystemColors.ControlText;
             this.RadioButton_AutoRunDuration.Location = new System.Drawing.Point(8, 76);
             this.RadioButton_AutoRunDuration.Name = "RadioButton_AutoRunDuration";
             this.RadioButton_AutoRunDuration.Size = new System.Drawing.Size(71, 16);
@@ -524,6 +534,7 @@
             // Label_AutoRunMinutes_Unit
             // 
             this.Label_AutoRunMinutes_Unit.AutoSize = true;
+            this.Label_AutoRunMinutes_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Label_AutoRunMinutes_Unit.Location = new System.Drawing.Point(143, 78);
             this.Label_AutoRunMinutes_Unit.Name = "Label_AutoRunMinutes_Unit";
             this.Label_AutoRunMinutes_Unit.Size = new System.Drawing.Size(40, 12);
@@ -546,6 +557,7 @@
             // Label_AutoRunSeconds_Unit
             // 
             this.Label_AutoRunSeconds_Unit.AutoSize = true;
+            this.Label_AutoRunSeconds_Unit.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Label_AutoRunSeconds_Unit.Location = new System.Drawing.Point(211, 78);
             this.Label_AutoRunSeconds_Unit.Name = "Label_AutoRunSeconds_Unit";
             this.Label_AutoRunSeconds_Unit.Size = new System.Drawing.Size(40, 12);
@@ -555,6 +567,7 @@
             // RadioButton_AutoRunEndTime
             // 
             this.RadioButton_AutoRunEndTime.AutoSize = true;
+            this.RadioButton_AutoRunEndTime.ForeColor = System.Drawing.SystemColors.ControlText;
             this.RadioButton_AutoRunEndTime.Location = new System.Drawing.Point(8, 100);
             this.RadioButton_AutoRunEndTime.Name = "RadioButton_AutoRunEndTime";
             this.RadioButton_AutoRunEndTime.Size = new System.Drawing.Size(71, 16);
@@ -576,6 +589,7 @@
             // RadioButton_AutoRunNoLimit
             // 
             this.RadioButton_AutoRunNoLimit.AutoSize = true;
+            this.RadioButton_AutoRunNoLimit.ForeColor = System.Drawing.SystemColors.ControlText;
             this.RadioButton_AutoRunNoLimit.Location = new System.Drawing.Point(8, 124);
             this.RadioButton_AutoRunNoLimit.Name = "RadioButton_AutoRunNoLimit";
             this.RadioButton_AutoRunNoLimit.Size = new System.Drawing.Size(71, 16);
@@ -587,6 +601,7 @@
             // Label_AutoRunRemaining
             // 
             this.Label_AutoRunRemaining.AutoSize = true;
+            this.Label_AutoRunRemaining.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Label_AutoRunRemaining.Location = new System.Drawing.Point(88, 126);
             this.Label_AutoRunRemaining.Name = "Label_AutoRunRemaining";
             this.Label_AutoRunRemaining.Size = new System.Drawing.Size(95, 12);
@@ -595,6 +610,7 @@
             // 
             // Button_AutoRun
             // 
+            this.Button_AutoRun.ForeColor = System.Drawing.SystemColors.ControlText;
             this.Button_AutoRun.Location = new System.Drawing.Point(290, 96);
             this.Button_AutoRun.Name = "Button_AutoRun";
             this.Button_AutoRun.Size = new System.Drawing.Size(110, 44);
@@ -618,7 +634,7 @@
             this.Controls.Add(this.Button_OpenFile);
             this.DoubleBuffered = true;
             this.Name = "MainForm";
-            this.Text = "TrainCrewMotorSound V1.0.14 (Build 2026.11.13)";
+            this.Text = "TrainCrewMotorSound V1.0.15 (Build 2026.11.13)";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_MotorVolume)).EndInit();

@@ -227,7 +227,13 @@ namespace TrainCrewMotorSound
                 else
                     sb.AppendLine("読込フォルダ　：未読込\n");
                 sb.AppendLine("現在速度　　　：" + speed.ToString("F2") + "km/h");
-                sb.AppendLine("加速・減速判定：" + (IsDeceleration ? "減速" : "加速"));
+                // 自動走行モード中は「加速」「惰行」「減速」の3つを表示
+                string judgeText = IsDeceleration ? "減速" : "加速";
+                if (autoRun.IsRunning)
+                {
+                    judgeText = autoRun.IsBraking ? "減速" : (autoRun.IsAccelerating ? "加速" : "惰行");
+                }
+                sb.AppendLine("加速・減速判定：" + judgeText);
                 Label_Parameters.Text = sb.ToString();
 
                 ResumeLayout();
