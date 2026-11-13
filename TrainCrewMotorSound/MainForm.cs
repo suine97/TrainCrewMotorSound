@@ -62,6 +62,9 @@ namespace TrainCrewMotorSound
             // 自動走行モードの終了日時初期値 (現在日時+15分)
             DateTimePicker_AutoRunEndTime.Value = DateTime.Now.AddMinutes(15);
 
+            // 自動走行モードの段階切り替え時に効果音を再生
+            autoRun.PhaseChanged += AutoRun_PhaseChanged;
+
             //初期化。起動時のみの呼び出しで大丈夫です。
             TrainCrewInput.Init();
         }
@@ -231,7 +234,15 @@ namespace TrainCrewMotorSound
                 string judgeText = IsDeceleration ? "減速" : "加速";
                 if (autoRun.IsRunning)
                 {
-                    judgeText = autoRun.IsBraking ? "減速" : (autoRun.IsAccelerating ? "加速" : "惰行");
+                    switch (autoRun.Phase)
+                    {
+                        case AutoRunPhase.DoorClosing: judgeText = "ドア閉"; break;
+                        case AutoRunPhase.BrakeReleasing: judgeText = "緩解"; break;
+                        case AutoRunPhase.Accelerating: judgeText = "加速"; break;
+                        case AutoRunPhase.Braking: judgeText = "減速"; break;
+                        case AutoRunPhase.DoorOpening: judgeText = "ドア開"; break;
+                        default: judgeText = "惰行"; break;
+                    }
                 }
                 sb.AppendLine("加速・減速判定：" + judgeText);
                 Label_Parameters.Text = sb.ToString();
@@ -470,17 +481,19 @@ namespace TrainCrewMotorSound
         /// <param name="e"></param>
         private void Button_AutoRun_Click(object sender, EventArgs e)
         {
-            // 走行中：1回目は減速して停止、減速中の2回目は即時に打ち切る
             if (autoRun.IsRunning)
             {
-                if (!autoRun.IsStopRequested)
+                if (autoRun.IsDriving && !autoRun.IsStopRequested)
                 {
+                    // 走行中の1回目：減速して停止 (停止後はドア開へ進む)
                     autoRun.RequestStop();
                     Button_AutoRun.Text = "即時停止";
                 }
                 else
                 {
+                    // 減速中の2回目、または発車前・停車後の待機中：即時に打ち切る
                     autoRun.Abort();
+                    sound.StopAllEffectSounds();
                     SetAutoRunControls(false);
                 }
                 return;
@@ -495,38 +508,155 @@ namespace TrainCrewMotorSound
                 return;
             }
 
-            // 終了日時を決定 (指定なしの場合はnull)
+            var settings = new AutoRunSettings
+            {
+                Acceleration = (double)NumericUpDown_AutoRunAcceleration.Value,
+                Deceleration = (double)NumericUpDown_AutoRunDeceleration.Value,
+                MaxSpeed = maxSpeed,
+                LowerSpeed = lowerSpeed,
+                DoorCloseSeconds = (double)NumericUpDown_EffectDoorClose.Value,
+                BrakeReleaseSeconds = (double)NumericUpDown_EffectBrakeRelease.Value,
+                DoorOpenSeconds = (double)NumericUpDown_EffectDoorOpen.Value
+            };
+
+            // 終了条件を決定 (指定なしの場合はどちらもnull)
             DateTime now = DateTime.Now;
-            DateTime? endTime = null;
             if (RadioButton_AutoRunDuration.Checked)
             {
+                // 走行時間：加速開始から0km/hまでの時間 (ドア閉・ブレーキ緩解・ドア開の待機時間は含まない)
                 double seconds = (double)NumericUpDown_AutoRunMinutes.Value * 60.0 + (double)NumericUpDown_AutoRunSeconds.Value;
                 if (seconds <= 0.0)
                 {
                     MessageBox.Show("走行時間を指定してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-                endTime = now.AddSeconds(seconds);
+                settings.RunSeconds = seconds;
             }
             else if (RadioButton_AutoRunEndTime.Checked)
             {
-                endTime = DateTimePicker_AutoRunEndTime.Value;
-                if (endTime.Value <= now)
+                // 終了日時：0km/hになる日時 (ドア閉・ブレーキ緩解の待機はその前に行う)
+                DateTime endTime = DateTimePicker_AutoRunEndTime.Value;
+                if (endTime <= now.AddSeconds(settings.DoorCloseSeconds + settings.BrakeReleaseSeconds))
                 {
-                    MessageBox.Show("終了日時は現在より後の日時を指定してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("終了日時は、現在にドア閉・ブレーキ緩解の待機時間を加えた日時より後を指定してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
+                settings.EndTime = endTime;
             }
 
-            autoRun.Start(
-                now,
-                (double)NumericUpDown_AutoRunAcceleration.Value,
-                (double)NumericUpDown_AutoRunDeceleration.Value,
-                maxSpeed,
-                lowerSpeed,
-                endTime);
             SetAutoRunControls(true);
+            autoRun.Start(now, settings);
             UpdateAutoRunRemaining(now);
+        }
+
+        /// <summary>
+        /// 自動走行モードの段階が切り替わった時の処理 (効果音の再生)
+        /// </summary>
+        /// <param name="phase">新しい段階</param>
+        private void AutoRun_PhaseChanged(AutoRunPhase phase)
+        {
+            try
+            {
+                switch (phase)
+                {
+                    case AutoRunPhase.DoorClosing:
+                        sound.PlayEffectSound(0);
+                        break;
+                    case AutoRunPhase.BrakeReleasing:
+                        sound.PlayEffectSound(1);
+                        break;
+                    case AutoRunPhase.DoorOpening:
+                        sound.PlayEffectSound(2);
+                        Button_AutoRun.Text = "停止";
+                        break;
+                }
+            }
+            catch
+            {
+                // 効果音が再生できなくても自動走行は続ける
+            }
+        }
+
+        /// <summary>
+        /// Button_EffectSelect_Clickイベント (効果音ファイルの選択)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Button_EffectSelect_Click(object sender, EventArgs e)
+        {
+            var button = (Button)sender;
+            int index = (int)button.Tag;
+
+            using (var openFileDialog = new OpenFileDialog { Filter = "Wave Files (*.wav)|*.wav" })
+            {
+                if (openFileDialog.ShowDialog() != DialogResult.OK) return;
+
+                try
+                {
+                    sound.LoadEffectSound(index, openFileDialog.FileName);
+                    button.Text = Path.GetFileName(openFileDialog.FileName);
+                    GetEffectClearButton(index).Enabled = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("音声ファイルを読み込めませんでした:\n" + openFileDialog.FileName + "\n\n" + ex.Message, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Button_EffectClear_Clickイベント (効果音ファイルの解除)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Button_EffectClear_Click(object sender, EventArgs e)
+        {
+            int index = (int)((Button)sender).Tag;
+
+            sound.UnloadEffectSound(index);
+            GetEffectSelectButton(index).Text = "音声ファイル選択";
+            GetEffectClearButton(index).Enabled = false;
+        }
+
+        /// <summary>
+        /// TrackBar_Effect_Scrollイベント (効果音の音量)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TrackBar_Effect_Scroll(object sender, EventArgs e)
+        {
+            var trackBar = (TrackBar)sender;
+            sound.SetEffectVolume((int)trackBar.Tag, trackBar.Value / 100f);
+        }
+
+        /// <summary>
+        /// 効果音の選択ボタンを取得するメソッド
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        /// <returns></returns>
+        private Button GetEffectSelectButton(int index)
+        {
+            switch (index)
+            {
+                case 0: return Button_EffectDoorClose;
+                case 1: return Button_EffectBrakeRelease;
+                default: return Button_EffectDoorOpen;
+            }
+        }
+
+        /// <summary>
+        /// 効果音の解除ボタンを取得するメソッド
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        /// <returns></returns>
+        private Button GetEffectClearButton(int index)
+        {
+            switch (index)
+            {
+                case 0: return Button_EffectDoorCloseClear;
+                case 1: return Button_EffectBrakeReleaseClear;
+                default: return Button_EffectDoorOpenClear;
+            }
         }
 
         /// <summary>
@@ -555,6 +685,16 @@ namespace TrainCrewMotorSound
             RadioButton_AutoRunDuration.Enabled = !isRunning;
             RadioButton_AutoRunEndTime.Enabled = !isRunning;
             RadioButton_AutoRunNoLimit.Enabled = !isRunning;
+
+            // 効果音の選択と再生時間は走行中に変更不可 (音量バーは操作可)
+            for (int i = 0; i < Sound.EffectSoundCount; i++)
+            {
+                GetEffectSelectButton(i).Enabled = !isRunning;
+                GetEffectClearButton(i).Enabled = !isRunning && sound.IsEffectSoundLoaded(i);
+            }
+            NumericUpDown_EffectDoorClose.Enabled = !isRunning;
+            NumericUpDown_EffectBrakeRelease.Enabled = !isRunning;
+            NumericUpDown_EffectDoorOpen.Enabled = !isRunning;
 
             // 選択中の終了条件の入力欄のみ有効にする
             NumericUpDown_AutoRunMinutes.Enabled = !isRunning && RadioButton_AutoRunDuration.Checked;

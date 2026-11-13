@@ -35,6 +35,13 @@ namespace TrainCrewMotorSound
         public string BrakeVolumePath = null;
         public string BrakeFrequencyPath = null;
 
+        /// <summary>効果音(1回だけ再生する音声)の数</summary>
+        public const int EffectSoundCount = 3;
+        private readonly SourceVoice[] effectSoundSource = new SourceVoice[EffectSoundCount];
+        private readonly AudioBuffer[] effectSoundBuffer = new AudioBuffer[EffectSoundCount];
+        private readonly WaveFormat[] effectSoundFormat = new WaveFormat[EffectSoundCount];
+        private readonly float[] effectSoundVolume = new float[] { 1.0f, 1.0f, 1.0f };
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -341,12 +348,125 @@ namespace TrainCrewMotorSound
         }
 
         /// <summary>
+        /// 効果音ファイル読み込みメソッド (読み込めない場合は例外を投げる)
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        /// <param name="filePath">音声ファイルのパス</param>
+        public void LoadEffectSound(int index, string filePath)
+        {
+            if (index < 0 || index >= EffectSoundCount) return;
+
+            AudioBuffer buffer;
+            WaveFormat waveFormat;
+            using (var stream = new SoundStream(File.OpenRead(filePath)))
+            {
+                waveFormat = stream.Format;
+                buffer = new AudioBuffer
+                {
+                    Stream = stream.ToDataStream(),
+                    AudioBytes = (int)stream.Length,
+                    LoopCount = 0,
+                    Flags = BufferFlags.EndOfStream
+                };
+            }
+
+            // 読み込みに成功してから既存の効果音と入れ替える
+            UnloadEffectSound(index);
+            effectSoundBuffer[index] = buffer;
+            effectSoundFormat[index] = waveFormat;
+        }
+
+        /// <summary>
+        /// 効果音の解除メソッド
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        public void UnloadEffectSound(int index)
+        {
+            if (index < 0 || index >= EffectSoundCount) return;
+
+            StopEffectSound(index);
+            effectSoundBuffer[index]?.Stream?.Dispose();
+            effectSoundBuffer[index] = null;
+            effectSoundFormat[index] = null;
+        }
+
+        /// <summary>
+        /// 効果音が読み込まれているか
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        /// <returns></returns>
+        public bool IsEffectSoundLoaded(int index)
+        {
+            return index >= 0 && index < EffectSoundCount && effectSoundBuffer[index] != null;
+        }
+
+        /// <summary>
+        /// 効果音を先頭から1回だけ再生するメソッド
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        public void PlayEffectSound(int index)
+        {
+            if (!IsEffectSoundLoaded(index)) return;
+
+            // 再生中の場合は止めて、先頭から再生し直す
+            StopEffectSound(index);
+
+            var sourceVoice = new SourceVoice(xAudio2, effectSoundFormat[index], VoiceFlags.None, maxFrequencyRatio: 1.0f);
+            sourceVoice.SubmitSourceBuffer(effectSoundBuffer[index], null);
+            sourceVoice.SetVolume(effectSoundVolume[index]);
+            sourceVoice.Start();
+            effectSoundSource[index] = sourceVoice;
+        }
+
+        /// <summary>
+        /// 効果音停止メソッド
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        public void StopEffectSound(int index)
+        {
+            if (index < 0 || index >= EffectSoundCount || effectSoundSource[index] == null) return;
+
+            effectSoundSource[index].Stop();
+            effectSoundSource[index].DestroyVoice();
+            effectSoundSource[index] = null;
+        }
+
+        /// <summary>
+        /// 全効果音停止メソッド
+        /// </summary>
+        public void StopAllEffectSounds()
+        {
+            for (int i = 0; i < EffectSoundCount; i++)
+            {
+                StopEffectSound(i);
+            }
+        }
+
+        /// <summary>
+        /// 効果音の音量設定メソッド (再生中の音声にもすぐ反映する)
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        /// <param name="volume">音量(0.0～1.0)</param>
+        public void SetEffectVolume(int index, float volume)
+        {
+            if (index < 0 || index >= EffectSoundCount) return;
+            if (float.IsNaN(volume) || volume < 0) volume = 0;
+
+            effectSoundVolume[index] = volume;
+            effectSoundSource[index]?.SetVolume(volume);
+        }
+
+        /// <summary>
         /// リソース解放
         /// </summary>
         public void Dispose()
         {
             // 既存の音声データをクリア
             ClearSoundData();
+            for (int i = 0; i < EffectSoundCount; i++)
+            {
+                UnloadEffectSound(i);
+            }
 
             // リソースを解放
             masteringVoice.Dispose();
