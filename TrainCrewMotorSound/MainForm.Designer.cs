@@ -28,6 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.MenuStrip_Main = new System.Windows.Forms.MenuStrip();
+            this.MenuItem_SaveConfig = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_LoadConfig = new System.Windows.Forms.ToolStripMenuItem();
             this.Button_OpenFile = new System.Windows.Forms.Button();
             this.TrackBar_MotorVolume = new System.Windows.Forms.TrackBar();
             this.TrackBar_RunVolume = new System.Windows.Forms.TrackBar();
@@ -91,6 +94,7 @@
             this.Button_AutoRun = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_MotorVolume)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_RunVolume)).BeginInit();
+            this.MenuStrip_Main.SuspendLayout();
             this.GroupBox_MotorSound.SuspendLayout();
             this.GroupBox_RunSound.SuspendLayout();
             this.GroupBox_Infomation.SuspendLayout();
@@ -110,10 +114,35 @@
             ((System.ComponentModel.ISupportInitialize)(this.NumericUpDown_AutoRunSeconds)).BeginInit();
             this.SuspendLayout();
             // 
+            // MenuStrip_Main
+            // 
+            this.MenuStrip_Main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_SaveConfig,
+            this.MenuItem_LoadConfig});
+            this.MenuStrip_Main.Location = new System.Drawing.Point(0, 0);
+            this.MenuStrip_Main.Name = "MenuStrip_Main";
+            this.MenuStrip_Main.Size = new System.Drawing.Size(434, 24);
+            this.MenuStrip_Main.TabIndex = 70;
+            this.MenuStrip_Main.Text = "MenuStrip_Main";
+            // 
+            // MenuItem_SaveConfig
+            // 
+            this.MenuItem_SaveConfig.Name = "MenuItem_SaveConfig";
+            this.MenuItem_SaveConfig.Size = new System.Drawing.Size(67, 20);
+            this.MenuItem_SaveConfig.Text = "設定保存";
+            this.MenuItem_SaveConfig.Click += new System.EventHandler(this.MenuItem_SaveConfig_Click);
+            // 
+            // MenuItem_LoadConfig
+            // 
+            this.MenuItem_LoadConfig.Name = "MenuItem_LoadConfig";
+            this.MenuItem_LoadConfig.Size = new System.Drawing.Size(67, 20);
+            this.MenuItem_LoadConfig.Text = "設定読込";
+            this.MenuItem_LoadConfig.Click += new System.EventHandler(this.MenuItem_LoadConfig_Click);
+            // 
             // Button_OpenFile
             // 
             this.Button_OpenFile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            this.Button_OpenFile.Location = new System.Drawing.Point(38, 93);
+            this.Button_OpenFile.Location = new System.Drawing.Point(38, 117);
             this.Button_OpenFile.Name = "Button_OpenFile";
             this.Button_OpenFile.Size = new System.Drawing.Size(132, 38);
             this.Button_OpenFile.TabIndex = 0;
@@ -165,7 +194,7 @@
             this.GroupBox_MotorSound.Controls.Add(this.Label_MotorVolume);
             this.GroupBox_MotorSound.Controls.Add(this.TrackBar_MotorVolume);
             this.GroupBox_MotorSound.ForeColor = System.Drawing.Color.Blue;
-            this.GroupBox_MotorSound.Location = new System.Drawing.Point(209, 12);
+            this.GroupBox_MotorSound.Location = new System.Drawing.Point(209, 36);
             this.GroupBox_MotorSound.Name = "GroupBox_MotorSound";
             this.GroupBox_MotorSound.Size = new System.Drawing.Size(213, 125);
             this.GroupBox_MotorSound.TabIndex = 4;
@@ -227,7 +256,7 @@
             this.GroupBox_RunSound.Controls.Add(this.TrackBar_RunVolume);
             this.GroupBox_RunSound.Controls.Add(this.ComboBox_RunSound);
             this.GroupBox_RunSound.ForeColor = System.Drawing.Color.Blue;
-            this.GroupBox_RunSound.Location = new System.Drawing.Point(209, 150);
+            this.GroupBox_RunSound.Location = new System.Drawing.Point(209, 174);
             this.GroupBox_RunSound.Margin = new System.Windows.Forms.Padding(3, 10, 3, 3);
             this.GroupBox_RunSound.Name = "GroupBox_RunSound";
             this.GroupBox_RunSound.Size = new System.Drawing.Size(213, 125);
@@ -261,7 +290,7 @@
             this.CheckBox_TopMost.AutoSize = true;
             this.CheckBox_TopMost.Checked = true;
             this.CheckBox_TopMost.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.CheckBox_TopMost.Location = new System.Drawing.Point(12, 12);
+            this.CheckBox_TopMost.Location = new System.Drawing.Point(12, 36);
             this.CheckBox_TopMost.Name = "CheckBox_TopMost";
             this.CheckBox_TopMost.Size = new System.Drawing.Size(84, 16);
             this.CheckBox_TopMost.TabIndex = 6;
@@ -283,7 +312,7 @@
             // 
             this.GroupBox_Infomation.Controls.Add(this.Label_Parameters);
             this.GroupBox_Infomation.ForeColor = System.Drawing.Color.Blue;
-            this.GroupBox_Infomation.Location = new System.Drawing.Point(12, 150);
+            this.GroupBox_Infomation.Location = new System.Drawing.Point(12, 174);
             this.GroupBox_Infomation.Name = "GroupBox_Infomation";
             this.GroupBox_Infomation.Size = new System.Drawing.Size(191, 125);
             this.GroupBox_Infomation.TabIndex = 7;
@@ -295,7 +324,7 @@
             this.CheckBox_NotchUnLinked.AutoSize = true;
             this.CheckBox_NotchUnLinked.Checked = true;
             this.CheckBox_NotchUnLinked.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.CheckBox_NotchUnLinked.Location = new System.Drawing.Point(12, 34);
+            this.CheckBox_NotchUnLinked.Location = new System.Drawing.Point(12, 58);
             this.CheckBox_NotchUnLinked.Name = "CheckBox_NotchUnLinked";
             this.CheckBox_NotchUnLinked.Size = new System.Drawing.Size(72, 16);
             this.CheckBox_NotchUnLinked.TabIndex = 8;
@@ -308,7 +337,7 @@
             this.CheckBox_EB.AutoSize = true;
             this.CheckBox_EB.Checked = true;
             this.CheckBox_EB.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.CheckBox_EB.Location = new System.Drawing.Point(12, 56);
+            this.CheckBox_EB.Location = new System.Drawing.Point(12, 80);
             this.CheckBox_EB.Name = "CheckBox_EB";
             this.CheckBox_EB.Size = new System.Drawing.Size(139, 16);
             this.CheckBox_EB.TabIndex = 9;
@@ -362,7 +391,7 @@
             this.GroupBox_AutoRun.Controls.Add(this.Label_AutoRunRemaining);
             this.GroupBox_AutoRun.Controls.Add(this.Button_AutoRun);
             this.GroupBox_AutoRun.ForeColor = System.Drawing.Color.Blue;
-            this.GroupBox_AutoRun.Location = new System.Drawing.Point(12, 281);
+            this.GroupBox_AutoRun.Location = new System.Drawing.Point(12, 305);
             this.GroupBox_AutoRun.Name = "GroupBox_AutoRun";
             this.GroupBox_AutoRun.Size = new System.Drawing.Size(410, 262);
             this.GroupBox_AutoRun.TabIndex = 10;
@@ -968,7 +997,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(434, 555);
+            this.ClientSize = new System.Drawing.Size(434, 579);
             this.Controls.Add(this.GroupBox_AutoRun);
             this.Controls.Add(this.CheckBox_EB);
             this.Controls.Add(this.CheckBox_NotchUnLinked);
@@ -977,13 +1006,17 @@
             this.Controls.Add(this.GroupBox_RunSound);
             this.Controls.Add(this.GroupBox_MotorSound);
             this.Controls.Add(this.Button_OpenFile);
+            this.Controls.Add(this.MenuStrip_Main);
             this.DoubleBuffered = true;
+            this.MainMenuStrip = this.MenuStrip_Main;
             this.Name = "MainForm";
             this.Text = "TrainCrewMotorSound V1.0.15 (Build 2026.11.13)";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_MotorVolume)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TrackBar_RunVolume)).EndInit();
+            this.MenuStrip_Main.ResumeLayout(false);
+            this.MenuStrip_Main.PerformLayout();
             this.GroupBox_MotorSound.ResumeLayout(false);
             this.GroupBox_RunSound.ResumeLayout(false);
             this.GroupBox_Infomation.ResumeLayout(false);
@@ -1009,6 +1042,9 @@
 
         #endregion
 
+        private System.Windows.Forms.MenuStrip MenuStrip_Main;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_SaveConfig;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_LoadConfig;
         private System.Windows.Forms.Button Button_OpenFile;
         private System.Windows.Forms.TrackBar TrackBar_MotorVolume;
         private System.Windows.Forms.TrackBar TrackBar_RunVolume;

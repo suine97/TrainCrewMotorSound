@@ -24,7 +24,10 @@ namespace TrainCrewMotorSound
         private bool IsNotchLinked = true;
         private bool IsRegenerationOffAtEB = true;
         private bool wasSoundPlaying = false;
+        private string vehicleFilePath = "";
         private string vehicleDirectoryName = "";
+        // 効果音(ドア閉・ブレーキ緩解・ドア開)のファイルパス (未選択はnull)
+        private readonly string[] effectSoundPaths = new string[Sound.EffectSoundCount];
         private string soundDirectoryName = "";
         private string motorNoiseDirectoryName = "";
         private string soundPath = "";
@@ -325,63 +328,83 @@ namespace TrainCrewMotorSound
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                try
+                bool isLoaded = LoadVehicle(openFileDialog.FileName, out string message);
+                if (message == null)
                 {
-                    // ファイルデータ初期化
-                    ClearAllFileData();
-
-                    // Vehicleファイル読み込み
-                    string filePath = openFileDialog.FileName;
-                    vehicleDirectoryName = Path.GetDirectoryName(filePath) + "\\";
-                    // カレンドディレクトリに設定
-                    Environment.CurrentDirectory = Path.GetDirectoryName(filePath);
-                    ReadVehicleFile(filePath, out bool isSoundFileLoaded, out bool isMotorNoiseFileLoaded);
-
-                    // 音声ファイル読み込み
-                    sound.LoadSoundFiles();
-
-                    // Motorサウンドを再生 (Runサウンドはコンボボックス選択時に再生する)
-                    sound.SoundAllPlay(-1);
-
-                    // コンボボックス更新
-                    InitializeRunSoundComboBox();
-
-                    // 各CSVデータ読込・整形処理
-                    if (sound.IsMotorSoundFileLoaded)
-                    {
-                        PowerVolumeData = sound.PowerVolumePath != null ? ConvertCSVData(sound.PowerVolumePath) : null;
-                        PowerFrequencyData = sound.PowerFrequencyPath != null ? ConvertCSVData(sound.PowerFrequencyPath) : null;
-                        BrakeVolumeData = sound.BrakeVolumePath != null ? ConvertCSVData(sound.BrakeVolumePath) : null;
-                        BrakeFrequencyData = sound.BrakeFrequencyPath != null ? ConvertCSVData(sound.BrakeFrequencyPath) : null;
-
-                        //// CSVファイル書き出し
-                        //WriteCsv("PowerVolumeData.csv", PowerVolumeData);
-                        //WriteCsv("PowerFrequencyData.csv", PowerFrequencyData);
-                        //WriteCsv("BrakeVolumeData.csv", BrakeVolumeData);
-                        //WriteCsv("BrakeFrequencyData.csv", BrakeFrequencyData);
-                    }
-
-                    // ファイル読込判定 (全ての読み込みが終わってから表示する)
-                    if (isSoundFileLoaded && isMotorNoiseFileLoaded)
-                    {
-                        MessageBox.Show("車両ファイルを正常に読み込みました。", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else if (isSoundFileLoaded)
-                    {
-                        MessageBox.Show("音声ファイルの読み込みには成功しましたが、MotorNoiseファイルが見つかりませんでした。\n\n走行音のみ再生可能です。", "情報", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    }
-                    else
-                    {
-                        MessageBox.Show("車両ファイルの読み込みに失敗しました。\n\nVehicleファイルの記述がBVE5/BVE6形式になっている事を確認してください。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
+                    MessageBox.Show("車両ファイルを正常に読み込みました。", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                catch (Exception ex)
+                else
                 {
-                    // ファイルデータ初期化
-                    ClearAllFileData();
-
-                    MessageBox.Show("車両ファイルの読み込みに失敗しました。\n\n" + ex.Message, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(message, isLoaded ? "情報" : "警告", MessageBoxButtons.OK, isLoaded ? MessageBoxIcon.Exclamation : MessageBoxIcon.Warning);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 車両ファイルを読み込むメソッド
+        /// </summary>
+        /// <param name="filePath">Vehicleファイルのパス</param>
+        /// <param name="message">正常に読み込めた場合はnull、それ以外は表示用のメッセージ</param>
+        /// <returns>音声ファイルを読み込めた場合はtrue</returns>
+        private bool LoadVehicle(string filePath, out string message)
+        {
+            message = null;
+            try
+            {
+                // ファイルデータ初期化
+                ClearAllFileData();
+
+                // Vehicleファイル読み込み
+                vehicleDirectoryName = Path.GetDirectoryName(filePath) + "\\";
+                // カレンドディレクトリに設定
+                Environment.CurrentDirectory = Path.GetDirectoryName(filePath);
+                ReadVehicleFile(filePath, out bool isSoundFileLoaded, out bool isMotorNoiseFileLoaded);
+
+                // 音声ファイル読み込み
+                sound.LoadSoundFiles();
+
+                // Motorサウンドを再生 (Runサウンドはコンボボックス選択時に再生する)
+                sound.SoundAllPlay(-1);
+
+                // コンボボックス更新
+                InitializeRunSoundComboBox();
+
+                // 各CSVデータ読込・整形処理
+                if (sound.IsMotorSoundFileLoaded)
+                {
+                    PowerVolumeData = sound.PowerVolumePath != null ? ConvertCSVData(sound.PowerVolumePath) : null;
+                    PowerFrequencyData = sound.PowerFrequencyPath != null ? ConvertCSVData(sound.PowerFrequencyPath) : null;
+                    BrakeVolumeData = sound.BrakeVolumePath != null ? ConvertCSVData(sound.BrakeVolumePath) : null;
+                    BrakeFrequencyData = sound.BrakeFrequencyPath != null ? ConvertCSVData(sound.BrakeFrequencyPath) : null;
+
+                    //// CSVファイル書き出し
+                    //WriteCsv("PowerVolumeData.csv", PowerVolumeData);
+                    //WriteCsv("PowerFrequencyData.csv", PowerFrequencyData);
+                    //WriteCsv("BrakeVolumeData.csv", BrakeVolumeData);
+                    //WriteCsv("BrakeFrequencyData.csv", BrakeFrequencyData);
+                }
+
+                // ファイル読込判定 (全ての読み込みが終わってから判定する)
+                if (isSoundFileLoaded)
+                {
+                    vehicleFilePath = filePath;
+                    if (!isMotorNoiseFileLoaded)
+                    {
+                        message = "音声ファイルの読み込みには成功しましたが、MotorNoiseファイルが見つかりませんでした。\n\n走行音のみ再生可能です。";
+                    }
+                    return true;
+                }
+
+                message = "車両ファイルの読み込みに失敗しました。\n\nVehicleファイルの記述がBVE5/BVE6形式になっている事を確認してください。";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // ファイルデータ初期化
+                ClearAllFileData();
+
+                message = "車両ファイルの読み込みに失敗しました。\n\n" + ex.Message;
+                return false;
             }
         }
 
@@ -595,15 +618,9 @@ namespace TrainCrewMotorSound
             {
                 if (openFileDialog.ShowDialog() != DialogResult.OK) return;
 
-                try
+                if (!SetEffectSound(index, openFileDialog.FileName, out string error))
                 {
-                    sound.LoadEffectSound(index, openFileDialog.FileName);
-                    button.Text = Path.GetFileName(openFileDialog.FileName);
-                    GetEffectClearButton(index).Enabled = true;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("音声ファイルを読み込めませんでした:\n" + openFileDialog.FileName + "\n\n" + ex.Message, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("音声ファイルを読み込めませんでした:\n" + openFileDialog.FileName + "\n\n" + error, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
         }
@@ -615,9 +632,42 @@ namespace TrainCrewMotorSound
         /// <param name="e"></param>
         private void Button_EffectClear_Click(object sender, EventArgs e)
         {
-            int index = (int)((Button)sender).Tag;
+            ClearEffectSound((int)((Button)sender).Tag);
+        }
 
+        /// <summary>
+        /// 効果音ファイルを読み込んで画面に反映するメソッド
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        /// <param name="filePath">音声ファイルのパス</param>
+        /// <param name="error">読み込めなかった場合の理由</param>
+        /// <returns>読み込めた場合はtrue</returns>
+        private bool SetEffectSound(int index, string filePath, out string error)
+        {
+            error = null;
+            try
+            {
+                sound.LoadEffectSound(index, filePath);
+                effectSoundPaths[index] = filePath;
+                GetEffectSelectButton(index).Text = Path.GetFileName(filePath);
+                GetEffectClearButton(index).Enabled = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 効果音ファイルの選択を解除するメソッド
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        private void ClearEffectSound(int index)
+        {
             sound.UnloadEffectSound(index);
+            effectSoundPaths[index] = null;
             GetEffectSelectButton(index).Text = "音声ファイル選択";
             GetEffectClearButton(index).Enabled = false;
         }
@@ -706,6 +756,9 @@ namespace TrainCrewMotorSound
             NumericUpDown_AutoRunSeconds.Enabled = !isRunning && RadioButton_AutoRunDuration.Checked;
             DateTimePicker_AutoRunEndTime.Enabled = !isRunning && RadioButton_AutoRunEndTime.Checked;
 
+            // 自動走行中は設定読込を不可にする
+            MenuItem_LoadConfig.Enabled = !isRunning;
+
             Button_AutoRun.Text = isRunning ? "停止" : "開始";
             if (!isRunning)
             {
@@ -736,6 +789,288 @@ namespace TrainCrewMotorSound
             {
                 Label_AutoRunRemaining.Text = text;
             }
+        }
+
+        /// <summary>
+        /// 効果音の音量バーを取得するメソッド
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        /// <returns></returns>
+        private TrackBar GetEffectTrackBar(int index)
+        {
+            switch (index)
+            {
+                case 0: return TrackBar_EffectDoorClose;
+                case 1: return TrackBar_EffectBrakeRelease;
+                default: return TrackBar_EffectDoorOpen;
+            }
+        }
+
+        /// <summary>
+        /// 効果音の再生時間入力欄を取得するメソッド
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        /// <returns></returns>
+        private NumericUpDown GetEffectNumericUpDown(int index)
+        {
+            switch (index)
+            {
+                case 0: return NumericUpDown_EffectDoorClose;
+                case 1: return NumericUpDown_EffectBrakeRelease;
+                default: return NumericUpDown_EffectDoorOpen;
+            }
+        }
+
+        /// <summary>
+        /// MenuItem_SaveConfig_Clickイベント (設定保存)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MenuItem_SaveConfig_Click(object sender, EventArgs e)
+        {
+            using (var saveFileDialog = new SaveFileDialog { Filter = "JSON Files (*.json)|*.json", DefaultExt = "json", AddExtension = true })
+            {
+                if (saveFileDialog.ShowDialog() != DialogResult.OK) return;
+
+                try
+                {
+                    CreateConfigFromControls().Save(saveFileDialog.FileName);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("設定ファイルの保存に失敗しました。\n\n" + ex.Message, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
+
+        /// <summary>
+        /// MenuItem_LoadConfig_Clickイベント (設定読込)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MenuItem_LoadConfig_Click(object sender, EventArgs e)
+        {
+            if (autoRun.IsRunning) return;
+
+            using (var openFileDialog = new OpenFileDialog { Filter = "JSON Files (*.json)|*.json" })
+            {
+                if (openFileDialog.ShowDialog() != DialogResult.OK) return;
+
+                // 読み込めない場合は画面の設定を変更しない
+                AppConfig config;
+                try
+                {
+                    config = AppConfig.Load(openFileDialog.FileName);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("設定ファイルを読み込めませんでした。\n\n" + ex.Message, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 読み込めなかったファイルがあれば、最後にまとめて表示する
+                List<string> problems = ApplyConfigToControls(config);
+                if (problems.Count > 0)
+                {
+                    MessageBox.Show("設定を読み込みましたが、以下は反映できませんでした。\n\n" + string.Join("\n\n", problems), "情報", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 画面の設定内容から保存用データを作成するメソッド
+        /// </summary>
+        /// <returns></returns>
+        private AppConfig CreateConfigFromControls()
+        {
+            var config = new AppConfig
+            {
+                TopMost = CheckBox_TopMost.Checked,
+                NotchLinked = CheckBox_NotchUnLinked.Checked,
+                RegenerationOffAtEB = CheckBox_EB.Checked,
+                RegenerationLimit = ComboBox_RegenerationLimit.SelectedIndex,
+                MotorVolume = TrackBar_MotorVolume.Value,
+                RunVolume = TrackBar_RunVolume.Value,
+                VehicleFile = vehicleFilePath ?? "",
+                RunSound = ComboBox_RunSound.SelectedItem as string ?? "",
+                Acceleration = (double)NumericUpDown_AutoRunAcceleration.Value,
+                Deceleration = (double)NumericUpDown_AutoRunDeceleration.Value,
+                MaxSpeed = (double)NumericUpDown_AutoRunMaxSpeed.Value,
+                LowerSpeed = (double)NumericUpDown_AutoRunLowerSpeed.Value,
+                DoorClose = CreateEffectConfig(0),
+                BrakeRelease = CreateEffectConfig(1),
+                DoorOpenWaitSeconds = (double)NumericUpDown_EffectDoorOpenWait.Value,
+                DoorOpen = CreateEffectConfig(2),
+                EndMode = RadioButton_AutoRunDuration.Checked ? "duration" : (RadioButton_AutoRunEndTime.Checked ? "endTime" : "none"),
+                RunMinutes = (double)NumericUpDown_AutoRunMinutes.Value,
+                RunSeconds = (double)NumericUpDown_AutoRunSeconds.Value
+            };
+            return config;
+        }
+
+        /// <summary>
+        /// 効果音の保存用データを作成するメソッド
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        /// <returns></returns>
+        private EffectSoundConfig CreateEffectConfig(int index)
+        {
+            return new EffectSoundConfig
+            {
+                File = effectSoundPaths[index] ?? "",
+                Volume = GetEffectTrackBar(index).Value,
+                Seconds = (double)GetEffectNumericUpDown(index).Value
+            };
+        }
+
+        /// <summary>
+        /// 読み込んだ設定内容を画面に反映するメソッド (設定に無い項目は現在の値を残す)
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns>反映できなかった項目の説明</returns>
+        private List<string> ApplyConfigToControls(AppConfig config)
+        {
+            var problems = new List<string>();
+
+            // チェックボックス
+            if (config.TopMost.HasValue) CheckBox_TopMost.Checked = config.TopMost.Value;
+            if (config.NotchLinked.HasValue) CheckBox_NotchUnLinked.Checked = config.NotchLinked.Value;
+            if (config.RegenerationOffAtEB.HasValue) CheckBox_EB.Checked = config.RegenerationOffAtEB.Value;
+
+            // 回生失効速度
+            if (config.RegenerationLimit.HasValue && ComboBox_RegenerationLimit.Items.Count > 0)
+            {
+                ComboBox_RegenerationLimit.SelectedIndex = ClampToInt(config.RegenerationLimit.Value, 0, ComboBox_RegenerationLimit.Items.Count - 1);
+            }
+
+            // 全体音量
+            if (config.MotorVolume.HasValue)
+            {
+                TrackBar_MotorVolume.Value = ClampToInt(config.MotorVolume.Value, TrackBar_MotorVolume.Minimum, TrackBar_MotorVolume.Maximum);
+                TrackBar_MotorVolume_Scroll(TrackBar_MotorVolume, EventArgs.Empty);
+            }
+            if (config.RunVolume.HasValue)
+            {
+                TrackBar_RunVolume.Value = ClampToInt(config.RunVolume.Value, TrackBar_RunVolume.Minimum, TrackBar_RunVolume.Maximum);
+                TrackBar_RunVolume_Scroll(TrackBar_RunVolume, EventArgs.Empty);
+            }
+
+            // 車両ファイル (保存されていない・見つからない場合は、現在の車両をそのままにする)
+            if (!string.IsNullOrWhiteSpace(config.VehicleFile))
+            {
+                if (!File.Exists(config.VehicleFile))
+                {
+                    problems.Add("車両ファイルが見つかりません:\n" + config.VehicleFile);
+                }
+                else
+                {
+                    LoadVehicle(config.VehicleFile, out string message);
+                    if (message != null) problems.Add(message);
+                }
+            }
+
+            // 走行音選択 (同じファイル名が無い場合は先頭のまま)
+            if (!string.IsNullOrEmpty(config.RunSound))
+            {
+                for (int i = 0; i < ComboBox_RunSound.Items.Count; i++)
+                {
+                    if (string.Equals(ComboBox_RunSound.Items[i] as string, config.RunSound, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ComboBox_RunSound.SelectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // 自動走行モード
+            SetNumericValue(NumericUpDown_AutoRunAcceleration, config.Acceleration);
+            SetNumericValue(NumericUpDown_AutoRunDeceleration, config.Deceleration);
+            SetNumericValue(NumericUpDown_AutoRunMaxSpeed, config.MaxSpeed);
+            SetNumericValue(NumericUpDown_AutoRunLowerSpeed, config.LowerSpeed);
+            SetNumericValue(NumericUpDown_EffectDoorOpenWait, config.DoorOpenWaitSeconds);
+            SetNumericValue(NumericUpDown_AutoRunMinutes, config.RunMinutes);
+            SetNumericValue(NumericUpDown_AutoRunSeconds, config.RunSeconds);
+
+            ApplyEffectConfig(0, config.DoorClose, "ドア閉", problems);
+            ApplyEffectConfig(1, config.BrakeRelease, "ブレーキ緩解", problems);
+            ApplyEffectConfig(2, config.DoorOpen, "ドア開", problems);
+
+            // 終了条件
+            switch ((config.EndMode ?? "").Trim().ToLowerInvariant())
+            {
+                case "duration": RadioButton_AutoRunDuration.Checked = true; break;
+                case "endtime": RadioButton_AutoRunEndTime.Checked = true; break;
+                case "none": RadioButton_AutoRunNoLimit.Checked = true; break;
+            }
+            SetAutoRunControls(false);
+
+            return problems;
+        }
+
+        /// <summary>
+        /// 効果音の設定内容を画面に反映するメソッド
+        /// </summary>
+        /// <param name="index">効果音のインデックス</param>
+        /// <param name="effect">設定内容 (nullの場合は何もしない)</param>
+        /// <param name="name">メッセージ表示用の名前</param>
+        /// <param name="problems">反映できなかった項目の説明の追加先</param>
+        private void ApplyEffectConfig(int index, EffectSoundConfig effect, string name, List<string> problems)
+        {
+            if (effect == null) return;
+
+            // 音量
+            if (effect.Volume.HasValue)
+            {
+                TrackBar trackBar = GetEffectTrackBar(index);
+                trackBar.Value = ClampToInt(effect.Volume.Value, trackBar.Minimum, trackBar.Maximum);
+                sound.SetEffectVolume(index, trackBar.Value / 100f);
+            }
+
+            // 再生時間
+            SetNumericValue(GetEffectNumericUpDown(index), effect.Seconds);
+
+            // 音声ファイル (nullの場合は現在の選択を残す。空文字の場合は未選択にする)
+            if (effect.File == null) return;
+            if (effect.File.Trim().Length == 0)
+            {
+                ClearEffectSound(index);
+            }
+            else if (!File.Exists(effect.File))
+            {
+                ClearEffectSound(index);
+                problems.Add(name + "の音声ファイルが見つかりません:\n" + effect.File);
+            }
+            else if (!SetEffectSound(index, effect.File, out string error))
+            {
+                ClearEffectSound(index);
+                problems.Add(name + "の音声ファイルを読み込めませんでした:\n" + effect.File + "\n" + error);
+            }
+        }
+
+        /// <summary>
+        /// NumericUpDownへ、範囲内に収めた値を設定するメソッド (値がnullの場合は何もしない)
+        /// </summary>
+        /// <param name="numericUpDown"></param>
+        /// <param name="value"></param>
+        private static void SetNumericValue(NumericUpDown numericUpDown, double? value)
+        {
+            if (!value.HasValue || double.IsNaN(value.Value)) return;
+
+            double clamped = Math.Max((double)numericUpDown.Minimum, Math.Min((double)numericUpDown.Maximum, value.Value));
+            numericUpDown.Value = Math.Round((decimal)clamped, numericUpDown.DecimalPlaces);
+        }
+
+        /// <summary>
+        /// 値を四捨五入し、範囲内の整数に収めるメソッド
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        private static int ClampToInt(double value, int min, int max)
+        {
+            if (double.IsNaN(value)) return min;
+            return (int)Math.Max(min, Math.Min(max, Math.Round(value)));
         }
 
         /// <summary>
@@ -800,6 +1135,7 @@ namespace TrainCrewMotorSound
         /// </summary>
         private void ClearAllFileData()
         {
+            vehicleFilePath = "";
             vehicleDirectoryName = "";
             soundDirectoryName = "";
             motorNoiseDirectoryName = "";
